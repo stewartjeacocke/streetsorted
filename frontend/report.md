@@ -15,6 +15,22 @@ permalink: /report/
   <button id="retry-location" type="button" hidden>Retry location</button>
 </section>
 
+<section id="nearby-step" hidden aria-labelledby="nearby-heading">
+  <h2 id="nearby-heading">Nearby reports</h2>
+  <p id="nearby-loading" role="status">Checking nearby reports…</p>
+  <p id="nearby-unavailable" hidden role="alert">Nearby reports could not be retrieved. Please try again.</p>
+  <button id="retry-nearby" type="button" hidden>Retry nearby reports</button>
+  <p id="nearby-empty" hidden>No nearby reports were found.</p>
+  <ul id="nearby-list" hidden></ul>
+  <div id="nearby-question" hidden>
+    <p>Does any nearby report match the issue you want to report?</p>
+    <button id="nearby-match" type="button">Yes, a report matches</button>
+    <button id="nearby-no-match" type="button">No, none match</button>
+  </div>
+  <button id="continue-no-results" type="button" hidden>Continue to report details</button>
+  <button class="cancel-report" type="button">Cancel</button>
+</section>
+
 <section id="details-step" hidden aria-labelledby="details-heading">
   <h2 id="details-heading">Tell us about the fly-tipping</h2>
   <p><strong>Category:</strong> Fly-tipping</p>

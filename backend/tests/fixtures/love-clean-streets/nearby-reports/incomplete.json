@@ -1,0 +1,4 @@
+[
+  { "Id": "missing-category", "Completed": false },
+  { "Id": "invalid-completion", "CategoryId": 16144, "Completed": "false" }
+]

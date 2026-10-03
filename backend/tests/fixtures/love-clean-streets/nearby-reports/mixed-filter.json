@@ -1,0 +1,5 @@
+[
+  { "Id": "nearby-1", "CategoryId": 16144, "Completed": false },
+  { "Id": "closed-fly", "CategoryId": 16144, "Completed": true },
+  { "Id": "other-open", "CategoryId": 17450, "Completed": false }
+]

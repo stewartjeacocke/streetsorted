@@ -3,6 +3,7 @@ import type { AppConfig } from './config.js';
 import { requestLogger } from './middleware/logger.js';
 import { securityMiddleware } from './middleware/security.js';
 import { reportRouter } from './routes/reports.js';
+import { nearbyReportsRouter } from './routes/nearby-reports.js';
 
 export function createApp(config: AppConfig) {
   const app = express();
@@ -11,6 +12,7 @@ export function createApp(config: AppConfig) {
   app.use(express.json({ limit: '16kb' }));
   app.use(requestLogger);
   app.get('/health', (_req, res) => res.json({ status: 'ok' }));
+  app.use('/api', nearbyReportsRouter(config));
   app.use('/api', reportRouter(config));
   app.use((_req, res) =>
     res.status(404).json({

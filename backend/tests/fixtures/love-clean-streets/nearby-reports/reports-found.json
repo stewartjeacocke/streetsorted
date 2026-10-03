@@ -1,0 +1,28 @@
+[
+  {
+    "Id": "nearby-1",
+    "CategoryName": "Dumped or flytipped waste",
+    "DateTimeRecorded": "2026-10-03T10:00:00Z",
+    "Address": "Example Street",
+    "StatusName": "Open",
+    "Description": "Approved waste report",
+    "Approved": true,
+    "Latitude": 51.538,
+    "Longitude": -0.102,
+    "Images": [{ "Href": "hidden" }],
+    "History": [{ "Text": "hidden" }]
+  },
+  {
+    "Id": "nearby-2",
+    "CategoryName": "Pavement obstruction",
+    "DateTimeRecorded": "2026-10-02T10:00:00Z",
+    "Address": "Other Street",
+    "StatusName": "Closed",
+    "Description": "Not approved",
+    "Approved": false,
+    "Latitude": 51.539,
+    "Longitude": -0.103,
+    "Images": [{ "Href": "hidden" }],
+    "History": [{ "Text": "hidden" }]
+  }
+]
