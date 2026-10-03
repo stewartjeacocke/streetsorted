@@ -46,6 +46,11 @@ export function useReportFlow() {
       setStep('location');
     }
   };
+  const applyManualLocation = async (latitude: number, longitude: number) => {
+    const l: Location = { latitude, longitude, capturedAt: new Date().toISOString() };
+    setLocation(l);
+    await lookup(l);
+  };
   const continueDetails = () => {
     setStep('details');
     setMessage('');
@@ -91,6 +96,7 @@ export function useReportFlow() {
     outcome,
     reset,
     getLocation,
+    applyManualLocation,
     lookup,
     continueDetails,
     match,

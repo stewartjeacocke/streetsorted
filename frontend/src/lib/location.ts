@@ -16,3 +16,6 @@ export function locate(): Promise<Location> {
     );
   });
 }
+export function formatCoordinate(value: number | undefined) {
+  return typeof value === 'number' && Number.isFinite(value) ? value.toFixed(5) : null;
+}

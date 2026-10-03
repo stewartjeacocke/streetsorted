@@ -18,7 +18,9 @@ export interface RawNearbyReport {
   Approved?: unknown;
 }
 export function isRelevantNearbyReport(report: RawNearbyReport) {
-  return report.CategoryId === flyTippingCategoryId && report.Completed === false;
+  return report.CategoryId === flyTippingCategoryId &&
+    report.Completed === false && report.StatusName !== 'Reject'
+    && report.StatusName !== 'Unjustified';
 }
 export const nearbySummarySchema = z.object({
   id: z.string(),

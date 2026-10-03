@@ -10,11 +10,13 @@ export default function App() {
   if (f.step === 'nearby')
     return (
       <NearbyReportsStep
+        location={f.location}
         reports={f.reports}
         message={f.message}
         onMatch={f.match}
         onNoMatch={f.continueDetails}
         onRetry={() => f.location && f.lookup(f.location)}
+        onApply={f.applyManualLocation}
         onCancel={f.reset}
       />
     );

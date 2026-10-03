@@ -39,6 +39,11 @@ test.describe("nearby report check", () => {
     page,
   }) => {
     await start(page);
+    await expect(page.getByLabel("Latitude")).toHaveValue("51.538");
+    await expect(page.getByLabel("Longitude")).toHaveValue("-0.102");
+    await expect(
+      page.getByText("Current lookup: 51.53800, -0.10200"),
+    ).toBeVisible();
     await expect(page.getByText("Dumped or flytipped waste")).toBeVisible();
     await expect(page.getByText("Pavement obstruction")).toHaveCount(0);
     await expect(page.getByText("Approved waste report")).toBeVisible();
@@ -47,6 +52,22 @@ test.describe("nearby report check", () => {
     await page.getByRole("button", { name: "Yes, a report matches" }).click();
     await expect(page.getByText("No new report was submitted.")).toBeVisible();
     await expect(page.getByLabel("Description")).toBeHidden();
+  });
+  test("applies edited coordinates to the next nearby lookup and submission flow", async ({
+    page,
+  }) => {
+    let lookupUrl = "";
+    page.on("request", (request) => {
+      if (request.url().includes("/api/nearby-reports"))
+        lookupUrl = request.url();
+    });
+    await start(page);
+    await page.getByLabel("Latitude").fill("51.60000");
+    await page.getByLabel("Longitude").fill("-0.20000");
+    await page.getByRole("button", { name: "Apply location" }).click();
+    await expect(page.getByText("No nearby reports were found.")).toBeVisible();
+    await expect.poll(() => lookupUrl).toContain("latitude=51.6");
+    await expect(lookupUrl).toContain("longitude=-0.2");
   });
   test("continues without a match after nearby reports are shown", async ({
     page,
