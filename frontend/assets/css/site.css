@@ -1,7 +1,0 @@
-:root { font-family: system-ui, sans-serif; color: #17212b; background: #f5f7f8; }
-.page-shell { max-width: 44rem; margin: 2rem auto; padding: 1.5rem; background: #fff; border-radius: .5rem; }
-button, textarea { font: inherit; margin: .5rem .5rem .5rem 0; }
-textarea { display: block; min-height: 8rem; width: 100%; }
-.error { color: #a40000; }
-.status { min-height: 1.4rem; }
-[hidden] { display: none !important; }

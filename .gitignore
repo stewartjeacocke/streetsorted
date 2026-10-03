@@ -10,12 +10,6 @@ coverage/
 .env.*
 !.env.example
 
-# Ruby / Jekyll
-.bundle/
-vendor/bundle/
-_site/
-.sass-cache/
-.jekyll-cache/
 
 # Editor / OS
 *.swp
