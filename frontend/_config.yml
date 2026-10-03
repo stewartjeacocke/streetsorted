@@ -1,0 +1,5 @@
+title: Street Sorted
+api_origin: "http://localhost:3000"
+exclude:
+  - Gemfile
+  - Gemfile.lock

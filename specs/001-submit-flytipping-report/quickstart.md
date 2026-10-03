@@ -91,6 +91,14 @@ claim submission succeeded.
 **Expected result**: The application returns `unconfirmed`, permits a retry, and never shows a
 success reference.
 
+## Local validation record
+
+- **2026-10-03**: Backend build, lint, unit tests, contract tests, and mock-target adapter
+  integration tests passed under Node.js 24.
+- **2026-10-03**: Jekyll build passed under Ruby 3.3, and all five Playwright scenarios passed
+  against the local Jekyll site, Node.js backend, and mock target service.
+- **2026-10-03**: No request was sent to the live council service during automated validation.
+
 ## Manual release check
 
 Before release, a maintainer authorized to use the target service MUST manually verify the anonymous

@@ -1,1 +1,27 @@
 .DS_Store
+
+# Node.js / TypeScript
+node_modules/
+dist/
+build/
+coverage/
+*.log
+.env
+.env.*
+!.env.example
+
+# Ruby / Jekyll
+.bundle/
+vendor/bundle/
+_site/
+.sass-cache/
+.jekyll-cache/
+
+# Editor / OS
+*.swp
+.vscode/
+.idea/
+
+# Browser test output
+test-results/
+playwright-report/
