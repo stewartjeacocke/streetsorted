@@ -1,0 +1,38 @@
+{{#> layout title="Nearby reports"}}
+<section>
+  <h2>Nearby reports</h2>
+  <p>Current lookup: {{locationDisplay}}</p>
+  {{#if reportsFound}}
+    <ul>
+      {{#each reports}}
+        <li>{{#each values}}{{#unless @first}} — {{/unless}}{{this}}{{/each}}</li>
+      {{/each}}
+    </ul>
+    <p>Does any nearby report match the issue you want to report?</p>
+    <form method="post" action="/report/nearby/decision">
+      <input type="hidden" name="csrf" value="{{csrfToken}}">
+      <button name="decision" value="match" type="submit">Yes, a report matches</button>
+      <button name="decision" value="continue" type="submit">No, none match</button>
+    </form>
+  {{else}}
+    {{#if noResults}}
+    <p>No nearby reports were found.</p>
+    <form method="post" action="/report/nearby/decision">
+      <input type="hidden" name="csrf" value="{{csrfToken}}">
+      <input type="hidden" name="decision" value="continue">
+      <button type="submit">Continue to report details</button>
+    </form>
+    {{else}}
+      <p role="alert">{{residentMessage}}</p>
+      <form method="post" action="/report/nearby/retry">
+        <input type="hidden" name="csrf" value="{{csrfToken}}">
+        <button type="submit">Retry nearby reports</button>
+      </form>
+    {{/if}}
+  {{/if}}
+  <form method="post" action="/report/cancel">
+    <input type="hidden" name="csrf" value="{{csrfToken}}">
+    <button type="submit">Cancel</button>
+  </form>
+</section>
+{{/layout}}

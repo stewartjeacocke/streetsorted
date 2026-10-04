@@ -11,6 +11,8 @@ describe('redact', () => {
         longitude: -0.1,
         cookie: 'secret',
         token: 'secret',
+        csrf: 'secret',
+        sessionId: 'secret',
         status: 200,
       }),
       {
@@ -19,6 +21,8 @@ describe('redact', () => {
         longitude: '[REDACTED]',
         cookie: '[REDACTED]',
         token: '[REDACTED]',
+        csrf: '[REDACTED]',
+        sessionId: '[REDACTED]',
         status: 200,
       },
     );

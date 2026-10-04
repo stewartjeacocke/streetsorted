@@ -1,0 +1,15 @@
+{{#> layout title="Submission outcome"}}
+<section>
+  <h2>Submission outcome</h2>
+  <p>{{message}}</p>
+  {{#if reference}}<p>Reference: {{reference}}</p>{{/if}}
+  {{#if retry}}
+    <form method="post" action="/report/submit/retry">
+      <input type="hidden" name="csrf" value="{{csrfToken}}">
+      <input type="hidden" name="confirmed" value="yes">
+      <button type="submit">Try submission again</button>
+    </form>
+  {{/if}}
+  <p><a href="/report">Start a new report</a></p>
+</section>
+{{/layout}}

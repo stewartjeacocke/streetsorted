@@ -1,7 +1,11 @@
 # Street Sorted
 
 Street Sorted is a single Node.js 26 application. Its Express server exposes the report API and
-serves the built React application from the same origin.
+serves a progressive-enhancement reporting journey at `/report`. Every report step is a
+server-rendered HTML page with standard forms and ordinary browser navigation.
+
+JavaScript is optional. The location page may use browser geolocation to fill the visible latitude
+and longitude inputs, but manual entry and every reporting action work without scripts.
 
 ## Install
 
@@ -17,8 +21,7 @@ Start the single Express service:
 npm run dev
 ```
 
-The application, API, and health endpoint are all available at `http://127.0.0.1:3000`. Client
-assets rebuild automatically after a source change; refresh the browser to load the rebuilt assets.
+The report pages, API, and health endpoint are available at `http://127.0.0.1:3000`.
 
 ### Local mock council target (optional)
 

@@ -6,7 +6,7 @@ import { logEvent } from './middleware/logger.js';
 
 const config = loadConfig();
 const currentDirectory = dirname(fileURLToPath(import.meta.url));
-const clientDirectory = resolve(currentDirectory, '../client');
-createApp(config, { clientDirectory }).listen(config.PORT, () =>
+const staticDirectory = resolve(currentDirectory, 'public');
+createApp(config, { staticDirectory }).listen(config.PORT, () =>
   logEvent('server_started', { port: config.PORT }),
 );

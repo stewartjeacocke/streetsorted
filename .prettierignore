@@ -1,0 +1,10 @@
+node_modules/
+dist/
+build/
+coverage/
+test-results/
+playwright-report/
+package-lock.json
+
+# Handlebars partial-block templates are unsupported by the installed Prettier parser.
+src/server/views/templates/
