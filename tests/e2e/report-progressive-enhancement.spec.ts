@@ -13,12 +13,16 @@ test.describe('progressively enhanced reporting', () => {
 
   test('submits a manual report with JavaScript disabled', async ({ page }) => {
     await reachDetails(page);
+    await expect(page).toHaveTitle('Report details | Street Sorted');
+    await expect(page.locator('main.page > h1')).toHaveText('Street Sorted');
+    await expect(page.locator('#root')).toHaveCount(0);
     await page.getByLabel('Description').fill('Waste beside bins');
     await page.getByRole('button', { name: 'Review report' }).click();
     await expect(page.getByRole('heading', { name: 'Review report' })).toBeVisible();
     await page.getByRole('button', { name: 'Confirm submission' }).click();
     await expect(page.getByText('Your report was submitted.')).toBeVisible();
     await expect(page.getByText('Reference: MOCK-100')).toBeVisible();
+    await expect(page).toHaveTitle('Submission outcome | Street Sorted');
   });
 
   test('allows duplicate-match exit without submitting a report', async ({ page }) => {
@@ -26,7 +30,7 @@ test.describe('progressively enhanced reporting', () => {
     await page.getByLabel('Latitude').fill('51.538');
     await page.getByLabel('Longitude').fill('-0.102');
     await page.getByRole('button', { name: 'Check nearby reports' }).click();
-    await expect(page.getByText('Dumped or flytipped waste')).toBeVisible();
+    await expect(page.getByText('Dumped or flytipped waste').first()).toBeVisible();
     await page.getByRole('button', { name: 'Yes, a report matches' }).click();
     await expect(page.getByText('No new report was submitted.')).toBeVisible();
   });

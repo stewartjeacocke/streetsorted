@@ -1,0 +1,13 @@
+{{#> layout title="Location" locationHelper=true}}
+<section>
+  <h2>Location required</h2>
+  <p>Enter your location to check for nearby reports. You can use the location helper if your browser supports it.</p>
+  {{> errors messages=messages}}
+  <form method="post" action="/report/location">
+    <input type="hidden" name="csrf" value="{{csrfToken}}">
+    <label>Latitude<input name="latitude" inputmode="decimal" value="{{latitude}}" required></label>
+    <label>Longitude<input name="longitude" inputmode="decimal" value="{{longitude}}" required></label>
+    <button type="submit">Check nearby reports</button>
+  </form>
+</section>
+{{/layout}}

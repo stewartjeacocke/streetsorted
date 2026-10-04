@@ -27,6 +27,15 @@ async function withApp(run: (agent: ReturnType<typeof request.agent>) => Promise
   }
 }
 
+function assertSharedDocument(html: string, locationHelper = false) {
+  assert.match(html, /<!doctype html>/i);
+  assert.match(html, /<html lang="en-GB">/);
+  assert.match(html, /<title>[^<]+ \| Street Sorted<\/title>/);
+  assert.match(html, /<main class="page">/);
+  assert.equal(/location-helper\.js/.test(html), locationHelper);
+  assert.doesNotMatch(html, /id="root"|main\.js|react/i);
+}
+
 function csrf(html: string) {
   const match = html.match(/name="csrf" value="([^"]+)"/);
   assert.ok(match, 'expected CSRF token');
@@ -57,7 +66,7 @@ describe('server-rendered report pages', () => {
       assert.match(response.text, /<form method="post" action="\/report\/location">/);
       assert.match(response.headers['set-cookie'].join(';'), /HttpOnly/);
       assert.match(response.headers['set-cookie'].join(';'), /SameSite=Lax/);
-      assert.doesNotMatch(response.text, /id="root"|react/i);
+      assertSharedDocument(response.text, true);
     }));
 
   it('keeps validation feedback on the server-rendered location page', async () =>
@@ -88,6 +97,7 @@ describe('server-rendered report pages', () => {
       assert.equal(outcome.status, 200);
       assert.match(outcome.text, /Your report was submitted/);
       assert.match(outcome.text, /MOCK-100/);
+      assertSharedDocument(outcome.text);
     }));
 
   it('shows nearby reports and exits without submitting when a match is selected', async () =>
@@ -104,6 +114,7 @@ describe('server-rendered report pages', () => {
         .type('form')
         .send({ csrf: csrf(nearby.text), decision: 'match' });
       assert.match(outcome.text, /No new report was submitted/);
+      assertSharedDocument(outcome.text);
     }));
 
   it('rejects missing CSRF tokens and missing report drafts', async () =>
@@ -116,6 +127,7 @@ describe('server-rendered report pages', () => {
       const direct = await request(agent.app).get('/report/review').set('Accept', 'text/html');
       assert.equal(direct.status, 409);
       assert.match(direct.text, /Start a new report/);
+      assertSharedDocument(direct.text);
     }));
 });
 

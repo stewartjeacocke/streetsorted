@@ -1,0 +1,22 @@
+{{#> layout title="Review report"}}
+<section>
+  <h2>Review report</h2>
+  <dl>
+    <dt>Location</dt><dd>{{locationDisplay}}</dd>
+    <dt>Description</dt><dd>{{description}}</dd>
+  </dl>
+  <form method="post" action="/report/submit">
+    <input type="hidden" name="csrf" value="{{csrfToken}}">
+    <input type="hidden" name="confirmed" value="yes">
+    <button type="submit">Confirm submission</button>
+  </form>
+  <form method="post" action="/report/review/edit">
+    <input type="hidden" name="csrf" value="{{csrfToken}}">
+    <button type="submit">Edit report</button>
+  </form>
+  <form method="post" action="/report/cancel">
+    <input type="hidden" name="csrf" value="{{csrfToken}}">
+    <button type="submit">Cancel</button>
+  </form>
+</section>
+{{/layout}}
