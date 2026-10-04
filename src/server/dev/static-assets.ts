@@ -2,6 +2,8 @@ import { cp, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import Handlebars from 'handlebars';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { loadConfig } from '../config.js';
+import { councilDirectoryFromConfig } from '../services/council-directory.js';
 
 const currentDirectory = dirname(fileURLToPath(import.meta.url));
 const projectDirectory = resolve(currentDirectory, '../../..');
@@ -17,7 +19,12 @@ async function renderLandingPage() {
     readFile(resolve(templateSourceDirectory, 'index.hbs'), 'utf8'),
   ]);
   handlebars.registerPartial('layout', layout);
-  return handlebars.compile(index)({});
+  const councils = councilDirectoryFromConfig(loadConfig()).profiles.map((profile) => ({
+    displayName: profile.displayName,
+    councilSubmissionUrl: profile.councilSubmissionUrl,
+    supported: profile.anonymousSubmissionAvailable,
+  }));
+  return handlebars.compile(index)({ councils });
 }
 
 export async function copyStaticAssets(

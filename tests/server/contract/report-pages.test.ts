@@ -91,6 +91,13 @@ describe('static prototype landing page', () => {
         response.text,
         /<a class="primary-action" href="\/report">Start a new report<\/a>/,
       );
+      assert.match(response.text, /<h3>Councils<\/h3>/);
+      assert.match(response.text, /Islington Council/);
+      assert.match(response.text, /Report fly-tipping on the Camden Council website/);
+      assert.match(
+        response.text,
+        /Street Sorted cannot submit a new fly-tipping report; use the council website\./,
+      );
       assertSharedDocument(response.text);
     } finally {
       await rm(temporaryDirectory, { recursive: true, force: true });

@@ -62,3 +62,20 @@ input:focus-visible {
   outline: 3px solid #005ea5;
   outline-offset: 2px;
 }
+
+.council-directory {
+  display: grid;
+  gap: 1rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.council-directory li {
+  border: 1px solid #b1b4b6;
+  padding: 1rem;
+}
+
+.council-directory h4 {
+  margin-top: 0;
+}

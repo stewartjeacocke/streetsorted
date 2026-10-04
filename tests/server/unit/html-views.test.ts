@@ -151,6 +151,15 @@ describe('runtime template assets', () => {
       assert.match(index, /<main class="page">/);
       assert.match(index, /<link rel="stylesheet" href="\/report\.css">/);
       assert.match(index, /Street Sorted is a prototype for reporting fly-tipping/);
+      assert.match(index, /<h3>Councils<\/h3>/);
+      assert.match(index, /Islington Council/);
+      assert.match(index, /Lancaster City Council/);
+      assert.match(index, /Street Sorted can submit a new fly-tipping report\./);
+      assert.match(
+        index,
+        /Street Sorted cannot submit a new fly-tipping report; use the council website\./,
+      );
+      assert.match(index, /href="https:\/\/www\.camden\.gov\.uk\/fly-tipping-street-obstructions"/);
       assert.match(index, /<a class="primary-action" href="\/report">Start a new report<\/a>/);
       assert.doesNotMatch(index, /Handlebars\.template|precompile/i);
       assert.match(await readFile(join(templatesDirectory, 'layout.hbs'), 'utf8'), /Street Sorted/);
