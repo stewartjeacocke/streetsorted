@@ -1,18 +1,16 @@
 import { createApp } from './app.js';
 import { loadConfig } from './config.js';
-import { clientDirectory, watchClient } from './dev/client-build.js';
 import { logEvent } from './middleware/logger.js';
+import { resolve } from 'node:path';
 
 const config = loadConfig();
-const clientBuild = await watchClient();
-const server = createApp(config, { clientDirectory }).listen(config.PORT, () =>
+const staticDirectory = resolve('src/server/public');
+const server = createApp(config, { staticDirectory }).listen(config.PORT, () =>
   logEvent('server_started', { port: config.PORT }),
 );
 
-async function stop() {
-  await clientBuild.dispose();
+function stop() {
   server.close();
 }
-
-process.once('SIGINT', () => void stop());
-process.once('SIGTERM', () => void stop());
+process.once('SIGINT', stop);
+process.once('SIGTERM', stop);

@@ -10,13 +10,29 @@
   background: #fff;
   border-radius: 0.5rem;
 }
-button,
-textarea {
-  font: inherit;
-  margin: 0.5rem 0.5rem 0.5rem 0;
+label {
+  display: block;
+  margin: 0.75rem 0;
 }
+input,
+textarea,
+button {
+  font: inherit;
+  margin-top: 0.25rem;
+}
+input,
 textarea {
   display: block;
   width: 100%;
+  max-width: 38rem;
+}
+textarea {
   min-height: 8rem;
+}
+button {
+  margin: 0.5rem 0.5rem 0.5rem 0;
+}
+.error {
+  border-left: 0.25rem solid #b00020;
+  padding-left: 1rem;
 }

@@ -1,46 +1,47 @@
 import express from 'express';
 import type { AppConfig } from './config.js';
 import { requestLogger } from './middleware/logger.js';
-import { securityMiddleware } from './middleware/security.js';
-import { reportRouter } from './routes/reports.js';
+import { apiCors, securityHeaders } from './middleware/security.js';
 import { nearbyReportsRouter } from './routes/nearby-reports.js';
+import { reportPagesRouter } from './routes/report-pages.js';
+import { reportRouter } from './routes/reports.js';
 
-type AppOptions = { clientDirectory?: string };
+type AppOptions = { staticDirectory?: string };
 
-const notFound = (_req: express.Request, res: express.Response) =>
-  res.status(404).json({
-    state: 'failed',
-    reference: null,
-    residentMessage: 'Not found.',
-    retryAllowed: false,
-  });
+const notFound = (req: express.Request, res: express.Response) =>
+  req.accepts('html')
+    ? res.status(404).type('html').send('<!doctype html><title>Not found</title><p>Not found.</p>')
+    : res.status(404).json({
+        state: 'failed',
+        reference: null,
+        residentMessage: 'Not found.',
+        retryAllowed: false,
+      });
 
-export function createApp(config: AppConfig, { clientDirectory }: AppOptions = {}) {
+export function createApp(config: AppConfig, { staticDirectory }: AppOptions = {}) {
   const app = express();
   app.disable('x-powered-by');
-  app.use(...securityMiddleware(config));
+  app.use(securityHeaders());
   app.use(express.json({ limit: '16kb' }));
+  app.use(express.urlencoded({ extended: false, limit: '16kb' }));
   app.use(requestLogger);
   app.get('/health', (_req, res) => res.json({ status: 'ok' }));
+  if (staticDirectory) app.use(express.static(staticDirectory));
+  app.use('/report', reportPagesRouter(config));
+  app.use('/api', apiCors(config));
   app.use('/api', nearbyReportsRouter(config));
   app.use('/api', reportRouter(config));
-  app.use('/api', notFound);
-
-  if (clientDirectory) {
-    app.use(express.static(clientDirectory));
-    app.use((req, res, next) => {
-      if (req.method !== 'GET' && req.method !== 'HEAD') return notFound(req, res);
-      return res.sendFile('index.html', { root: clientDirectory }, (error) => {
-        if (error) next(error);
-      });
-    });
-  } else {
-    app.use(notFound);
-  }
-
+  app.use(notFound);
   app.use(
-    (error: Error, _req: express.Request, res: express.Response, next: express.NextFunction) => {
+    (error: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
       void next;
+      if (req.accepts('html'))
+        return res
+          .status(error.message === 'Origin is not allowed' ? 403 : 500)
+          .type('html')
+          .send(
+            '<!doctype html><title>Service unavailable</title><p>The service could not process the request.</p>',
+          );
       return res.status(error.message === 'Origin is not allowed' ? 403 : 500).json({
         state: 'failed',
         reference: null,
