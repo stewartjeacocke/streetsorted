@@ -89,6 +89,13 @@ export function createMockTarget() {
       },
     ]);
   });
+  app.get('/point/4326/:coordinates', (req, res) => {
+    const latitude = Number(String(req.params.coordinates).split(',')[1]);
+    if (latitude === 51.51) return res.json({ camden: { id: 'camden' } });
+    if (latitude === 51.8) return res.json({});
+    if (latitude === 51.9) return res.status(503).json({ error: 'unavailable' });
+    return res.json({ islington: { id: 'islington' } });
+  });
   app.post('/home/ssosignin', (_req, res) =>
     res.cookie('anonymous', 'mock').redirect(302, '/reports/add'),
   );

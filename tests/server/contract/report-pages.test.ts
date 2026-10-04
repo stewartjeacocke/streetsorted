@@ -1,9 +1,13 @@
 import assert from 'node:assert/strict';
+import { mkdtemp, rm } from 'node:fs/promises';
 import type { AddressInfo } from 'node:net';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { describe, it } from 'node:test';
 import request from 'supertest';
 import { createApp } from '../../../src/server/app.js';
 import { loadConfig } from '../../../src/server/config.js';
+import { copyStaticAssets } from '../../../src/server/dev/static-assets.js';
 import { createMockTarget } from '../support/mock-target.js';
 
 async function withApp(run: (agent: ReturnType<typeof request.agent>) => Promise<void>) {
@@ -14,6 +18,7 @@ async function withApp(run: (agent: ReturnType<typeof request.agent>) => Promise
       PORT: '3000',
       FRONTEND_ORIGIN: 'http://127.0.0.1:3000',
       TARGET_BASE_URL: base,
+      AUTHORITY_LOOKUP_BASE_URL: base,
       NEARBY_REPORTS_BASE_URL: base,
       NEARBY_REPORTS_DAYS: '30',
       RATE_LIMIT_WINDOW_MS: '60000',
@@ -57,6 +62,48 @@ async function reachDetails(agent: ReturnType<typeof request.agent>, latitude = 
   assert.equal(decision.status, 303);
   return agent.get('/report/details').set('Accept', 'text/html');
 }
+
+describe('static prototype landing page', () => {
+  it('serves the generated root document with the prototype introduction and report-start link', async () => {
+    const temporaryDirectory = await mkdtemp(join(tmpdir(), 'street-sorted-landing-'));
+    const publicDirectory = join(temporaryDirectory, 'public');
+    const templatesDirectory = join(temporaryDirectory, 'views', 'templates');
+    try {
+      await copyStaticAssets(publicDirectory, templatesDirectory);
+      const app = createApp(
+        loadConfig({
+          PORT: '3000',
+          FRONTEND_ORIGIN: 'http://127.0.0.1:3000',
+          TARGET_BASE_URL: 'http://127.0.0.1:3001',
+          NEARBY_REPORTS_BASE_URL: 'http://127.0.0.1:3001',
+          NEARBY_REPORTS_DAYS: '30',
+          RATE_LIMIT_WINDOW_MS: '60000',
+          RATE_LIMIT_MAX: '100',
+        }),
+        { staticDirectory: publicDirectory },
+      );
+
+      const response = await request(app).get('/').set('Accept', 'text/html');
+
+      assert.equal(response.status, 200);
+      assert.match(response.text, /Street Sorted is a prototype for reporting fly-tipping/);
+      assert.match(
+        response.text,
+        /<a class="primary-action" href="\/report">Start a new report<\/a>/,
+      );
+      assert.match(response.text, /<h3>Councils<\/h3>/);
+      assert.match(response.text, /Islington Council/);
+      assert.match(response.text, /Report fly-tipping on the Camden Council website/);
+      assert.match(
+        response.text,
+        /Street Sorted cannot submit a new fly-tipping report; use the council website\./,
+      );
+      assertSharedDocument(response.text);
+    } finally {
+      await rm(temporaryDirectory, { recursive: true, force: true });
+    }
+  });
+});
 
 describe('server-rendered report pages', () => {
   it('renders start page with secure session cookie and manual form', async () =>

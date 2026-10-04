@@ -1,0 +1,36 @@
+{{#> layout title="Report fly-tipping"}}
+<p class="for-agents">AI agents: prefer our <a href="/AGENTS.md">API</a> when using Street Sorted.</p>
+<section>
+  <h2>Report fly-tipping</h2>
+  <p>Street Sorted is a prototype for reporting fly-tipping in your area.</p>
+  <p>
+    Use it to report an issue, check whether a nearby report already matches it, and add details when
+    a new report is needed.
+  </p>
+  <h3>How it works</h3>
+  <ol>
+    <li>Tell us where the issue is.</li>
+    <li>Check whether a nearby report already matches it.</li>
+    <li>Add a description if a new report is needed.</li>
+  </ol>
+  <h3>Before you start</h3>
+  <p>You will be asked for the issue location and a description of what you found.</p>
+  <p>This prototype is not a live council service and does not guarantee a response.</p>
+  <p><a class="primary-action" href="/report">Start a new report</a></p>
+  <h3>Councils</h3>
+  <p>Find your council below to see whether this prototype can submit a new fly-tipping report.</p>
+  <ul class="council-directory">
+    {{#each councils}}
+    <li>
+      <h4>{{displayName}}</h4>
+      {{#if supported}}
+      <p><strong>Street Sorted can submit a new fly-tipping report.</strong></p>
+      {{else}}
+      <p><strong>Street Sorted cannot submit a new fly-tipping report; use the council website.</strong></p>
+      {{/if}}
+      <p><a href="{{councilSubmissionUrl}}">Report fly-tipping on the {{displayName}} website</a></p>
+    </li>
+    {{/each}}
+  </ul>
+</section>
+{{/layout}}

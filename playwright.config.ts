@@ -13,7 +13,7 @@ export default defineConfig({
     },
     {
       command:
-        'TARGET_BASE_URL=http://127.0.0.1:3001 NEARBY_REPORTS_BASE_URL=http://127.0.0.1:3001 npm run dev',
+        'TARGET_BASE_URL=http://127.0.0.1:3001 NEARBY_REPORTS_BASE_URL=http://127.0.0.1:3001 AUTHORITY_LOOKUP_BASE_URL=http://127.0.0.1:3001 npm run dev',
       url: 'http://127.0.0.1:3000/health',
       reuseExistingServer: false,
       timeout: 60000,

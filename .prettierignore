@@ -8,3 +8,9 @@ package-lock.json
 
 # Handlebars partial-block templates are unsupported by the installed Prettier parser.
 src/server/views/templates/
+
+# Repository-managed agent metadata, generated Spec Kit artifacts, and vendored examples
+.agents/
+.specify/
+coding-agents-at-ibm/
+specs/

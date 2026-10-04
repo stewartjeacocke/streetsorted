@@ -23,6 +23,10 @@ npm run dev
 
 The report pages, API, and health endpoint are available at `http://127.0.0.1:3000`.
 
+### Multi-council routing
+
+Council routing uses a server-side geographic authority provider. Set `AUTHORITY_LOOKUP_BASE_URL` and, if required, `AUTHORITY_LOOKUP_API_KEY` only in runtime configuration. Compatible councils are supplied through the public-only `COUNCIL_PROFILES` JSON catalogue; never place provider credentials in that catalogue.
+
 ### Local mock council target (optional)
 
 To use the local mock council target instead of the configured upstream services, run these in
@@ -33,7 +37,7 @@ separate terminals:
 npm run dev:mock-target
 
 # Terminal 2
-TARGET_BASE_URL=http://127.0.0.1:3001 NEARBY_REPORTS_BASE_URL=http://127.0.0.1:3001 npm run dev
+TARGET_BASE_URL=http://127.0.0.1:3001 NEARBY_REPORTS_BASE_URL=http://127.0.0.1:3001 AUTHORITY_LOOKUP_BASE_URL=http://127.0.0.1:3001 npm run dev
 ```
 
 ## Build and run

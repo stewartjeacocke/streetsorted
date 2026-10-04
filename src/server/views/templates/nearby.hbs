@@ -2,6 +2,8 @@
 <section>
   <h2>Nearby reports</h2>
   <p>Current lookup: {{locationDisplay}}</p>
+  <p class="council">Reporting to: {{councilName}}</p>
+  <p><a href="/report">Correct location</a></p>
   {{#if reportsFound}}
     <ul>
       {{#each reports}}

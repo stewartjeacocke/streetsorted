@@ -1,28 +1,22 @@
 import { randomBytes } from 'node:crypto';
 import type { NearbyResult } from '../domain/nearby-report.js';
 import type { IncidentLocation } from '../domain/report.js';
-
 export type ReportStage = 'location' | 'nearby' | 'details' | 'review';
-
 export type ReportDraftSession = {
   id: string;
   csrfToken: string;
   stage: ReportStage;
   location?: IncidentLocation;
+  councilProfileId?: string;
+  nearbyCouncilProfileId?: string;
   description?: string;
   nearby?: NearbyResult;
   lastActivityAt: number;
 };
-
 const ttlMs = 5 * 60 * 1000;
-
-function token() {
-  return randomBytes(32).toString('base64url');
-}
-
+const token = () => randomBytes(32).toString('base64url');
 export class ReportDraftSessionStore {
   private readonly sessions = new Map<string, ReportDraftSession>();
-
   create(now = Date.now()) {
     const draft: ReportDraftSession = {
       id: token(),
@@ -33,7 +27,6 @@ export class ReportDraftSessionStore {
     this.sessions.set(draft.id, draft);
     return draft;
   }
-
   get(id: string | undefined, now = Date.now()) {
     if (!id) return null;
     const draft = this.sessions.get(id);
@@ -45,7 +38,6 @@ export class ReportDraftSessionStore {
     draft.lastActivityAt = now;
     return draft;
   }
-
   update(
     draft: ReportDraftSession,
     updates: Partial<Omit<ReportDraftSession, 'id' | 'csrfToken'>>,
@@ -53,15 +45,27 @@ export class ReportDraftSessionStore {
     Object.assign(draft, updates, { lastActivityAt: Date.now() });
     return draft;
   }
-
+  resetLocation(
+    draft: ReportDraftSession,
+    location: IncidentLocation,
+    councilProfileId: string,
+    stage: ReportStage = 'nearby',
+  ) {
+    return this.update(draft, {
+      stage,
+      location,
+      councilProfileId,
+      nearbyCouncilProfileId: undefined,
+      description: undefined,
+      nearby: undefined,
+    });
+  }
   clear(id: string | undefined) {
     if (id) this.sessions.delete(id);
   }
-
   cleanup(now = Date.now()) {
     for (const [id, draft] of this.sessions)
       if (now - draft.lastActivityAt > ttlMs) this.sessions.delete(id);
   }
 }
-
 export const reportDraftTtlMs = ttlMs;

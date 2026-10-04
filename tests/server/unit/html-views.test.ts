@@ -139,16 +139,68 @@ describe('templated report pages', () => {
 });
 
 describe('runtime template assets', () => {
-  it('copies private view templates beside compiled server views without serving them publicly', async () => {
+  it('renders the private index template to public HTML without publishing template sources', async () => {
     const temporaryDirectory = await mkdtemp(join(tmpdir(), 'street-sorted-assets-'));
     const publicDirectory = join(temporaryDirectory, 'public');
     const templatesDirectory = join(temporaryDirectory, 'views', 'templates');
     try {
       await copyStaticAssets(publicDirectory, templatesDirectory);
+
+      const index = await readFile(join(publicDirectory, 'index.html'), 'utf8');
+      const agentsGuide = await readFile(join(publicDirectory, 'AGENTS.md'), 'utf8');
+      assert.match(index, /<!doctype html>/i);
+      assert.match(index, /<main class="page">/);
+      assert.match(
+        index,
+        /<p class="for-agents">AI agents: prefer our <a href="\/AGENTS\.md">API<\/a> when using Street Sorted\.<\/p>/,
+      );
+      assert.ok(index.indexOf('class="for-agents"') < index.indexOf('<h2>Report fly-tipping<'));
+      assert.match(index, /<link rel="stylesheet" href="\/report\.css">/);
+      assert.match(index, /Street Sorted is a prototype for reporting fly-tipping/);
+      assert.match(index, /<h3>Councils<\/h3>/);
+      assert.match(index, /Islington Council/);
+      assert.match(index, /Lancaster City Council/);
+      assert.match(index, /Street Sorted can submit a new fly-tipping report\./);
+      assert.match(
+        index,
+        /Street Sorted cannot submit a new fly-tipping report; use the council website\./,
+      );
+      assert.match(index, /href="https:\/\/www\.camden\.gov\.uk\/fly-tipping-street-obstructions"/);
+      assert.match(index, /<a class="primary-action" href="\/report">Start a new report<\/a>/);
+      assert.doesNotMatch(index, /Handlebars\.template|precompile/i);
+      assert.match(agentsGuide, /GET \/health/);
+      assert.match(agentsGuide, /GET \/api\/nearby-reports/);
+      assert.match(agentsGuide, /POST \/api\/reports/);
+      assert.match(agentsGuide, /\/report/);
+      assert.match(agentsGuide, /Use only the public/);
       assert.match(await readFile(join(templatesDirectory, 'layout.hbs'), 'utf8'), /Street Sorted/);
       await assert.rejects(access(join(publicDirectory, 'layout.hbs')));
+      await assert.rejects(access(join(publicDirectory, 'index.hbs')));
     } finally {
       await rm(temporaryDirectory, { recursive: true, force: true });
     }
   });
+});
+
+it('renders a council website link instead of a report-details form when anonymous submission is unavailable', async () => {
+  const { detailsPage } = await import('../../../src/server/views/report-pages.js');
+  const html = detailsPage(
+    {
+      id: 'draft',
+      csrfToken: 'csrf',
+      stage: 'details',
+      councilProfileId: 'camden',
+      lastActivityAt: Date.now(),
+    },
+    [],
+    '',
+    'Camden Council',
+    'https://www.camden.gov.uk/fly-tipping-street-obstructions',
+  );
+  assert.match(
+    html,
+    /It is not possible to submit a report to Camden Council through this service/,
+  );
+  assert.match(html, /href="https:\/\/www\.camden\.gov\.uk\/fly-tipping-street-obstructions"/);
+  assert.doesNotMatch(html, /action="\/report\/details"/);
 });
