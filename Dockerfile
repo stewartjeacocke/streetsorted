@@ -2,7 +2,7 @@ FROM node:26-bookworm-slim AS build
 WORKDIR /app
 COPY package*.json ./
 RUN npm ci
-COPY tsconfig.server.json tsconfig.client.json ./
+COPY tsconfig.server.json ./
 COPY src ./src
 RUN npm run build && npm prune --omit=dev
 
