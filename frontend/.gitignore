@@ -1,7 +1,0 @@
-.bundle/
-vendor/bundle/
-_site/
-.jekyll-cache/
-.sass-cache/
-Gemfile.lock
-*.tsbuildinfo
