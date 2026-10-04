@@ -2,7 +2,18 @@ import { useState } from 'react';
 import { locate, fresh } from '../lib/location';
 import { nearby, submit, type Location, type Nearby } from '../api/report-api';
 type Step = 'location' | 'nearby' | 'details' | 'review' | 'outcome';
-export function useReportFlow() {
+
+export type ReportFlowDependencies = {
+  locate: typeof locate;
+  fresh: typeof fresh;
+  nearby: typeof nearby;
+  submit: typeof submit;
+};
+
+const defaultDependencies: ReportFlowDependencies = { locate, fresh, nearby, submit };
+
+export function useReportFlow(dependencies: ReportFlowDependencies = defaultDependencies) {
+  const { locate, fresh, nearby, submit } = dependencies;
   const [step, setStep] = useState<Step>('location');
   const [location, setLocation] = useState<Location | null>(null);
   const [reports, setReports] = useState<Nearby[]>([]);

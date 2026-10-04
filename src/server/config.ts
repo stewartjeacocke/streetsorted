@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 const schema = z.object({
   PORT: z.coerce.number().int().positive().default(3000),
-  FRONTEND_ORIGIN: z.string().url().default('http://127.0.0.1:4000'),
+  FRONTEND_ORIGIN: z.string().url().default('http://127.0.0.1:3000'),
   TARGET_BASE_URL: z.string().url().default('https://islington.lovecleanstreets.com'),
   NEARBY_REPORTS_BASE_URL: z.string().url().default('https://api.mediaklik.com'),
   NEARBY_REPORTS_DAYS: z.coerce.number().int().positive().default(30),

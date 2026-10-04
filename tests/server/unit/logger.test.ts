@@ -1,9 +1,10 @@
-import { describe, expect, it } from 'vitest';
+import assert from 'node:assert/strict';
+import { describe, it } from 'node:test';
 import { redact } from '../../../src/server/middleware/logger.js';
 
 describe('redact', () => {
   it('removes report content, coordinates, cookies, and tokens', () => {
-    expect(
+    assert.deepEqual(
       redact({
         description: 'private waste details',
         latitude: 51.5,
@@ -12,13 +13,14 @@ describe('redact', () => {
         token: 'secret',
         status: 200,
       }),
-    ).toEqual({
-      description: '[REDACTED]',
-      latitude: '[REDACTED]',
-      longitude: '[REDACTED]',
-      cookie: '[REDACTED]',
-      token: '[REDACTED]',
-      status: 200,
-    });
+      {
+        description: '[REDACTED]',
+        latitude: '[REDACTED]',
+        longitude: '[REDACTED]',
+        cookie: '[REDACTED]',
+        token: '[REDACTED]',
+        status: 200,
+      },
+    );
   });
 });

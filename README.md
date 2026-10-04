@@ -1,7 +1,7 @@
 # Street Sorted
 
-Street Sorted is a single Node.js 26 application. Its Express server exposes the report API and,
-in production, serves the built React application from the same origin.
+Street Sorted is a single Node.js 26 application. Its Express server exposes the report API and
+serves the built React application from the same origin.
 
 ## Install
 
@@ -11,15 +11,14 @@ npm install
 
 ## Development
 
-Start the Vite client and local API together:
+Start the single Express service:
 
 ```bash
 npm run dev
 ```
 
-This starts the Vite client at `http://127.0.0.1:4000` and the Express API at
-`http://127.0.0.1:3000`. Vite proxies `/api` requests to that local API. Production requests are
-same-origin and use the server at port 3000.
+The application, API, and health endpoint are all available at `http://127.0.0.1:3000`. Client
+assets rebuild automatically after a source change; refresh the browser to load the rebuilt assets.
 
 ### Local mock council target (optional)
 

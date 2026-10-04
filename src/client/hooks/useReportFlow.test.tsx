@@ -1,38 +1,42 @@
-import { act, renderHook } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
-import { useReportFlow } from './useReportFlow';
-vi.mock('../lib/location', () => ({
+import assert from 'node:assert/strict';
+import { afterEach, describe, it } from 'node:test';
+import { act, cleanup, renderHook } from '@testing-library/react';
+import { useReportFlow, type ReportFlowDependencies } from './useReportFlow';
+
+const dependencies: ReportFlowDependencies = {
   fresh: () => true,
-  locate: vi.fn(async () => ({
+  locate: async () => ({
     latitude: 51.5,
     longitude: -0.1,
     capturedAt: new Date().toISOString(),
-  })),
-}));
-vi.mock('../api/report-api', () => ({
-  nearby: vi.fn(async () => ({ state: 'no-results', reports: [] })),
-  submit: vi.fn(async () => ({
+  }),
+  nearby: async () => ({ state: 'no-results', reports: [] }),
+  submit: async () => ({
     state: 'confirmed',
     residentMessage: 'Your report was submitted.',
     reference: 'REF',
     retryAllowed: false,
-  })),
-}));
+  }),
+};
+
+afterEach(cleanup);
+
 describe('useReportFlow', () => {
   it('resets transient draft state', async () => {
-    const { result } = renderHook(() => useReportFlow());
+    const { result } = renderHook(() => useReportFlow(dependencies));
     await act(async () => {
       await result.current.getLocation();
     });
     act(() => result.current.continueDetails());
     act(() => result.current.setDescription('Waste'));
     act(() => result.current.reset());
-    expect(result.current.step).toBe('location');
-    expect(result.current.description).toBe('');
-    expect(result.current.location).toBeNull();
+    assert.equal(result.current.step, 'location');
+    assert.equal(result.current.description, '');
+    assert.equal(result.current.location, null);
   });
+
   it('moves through no-results, review, and confirmed outcome', async () => {
-    const { result } = renderHook(() => useReportFlow());
+    const { result } = renderHook(() => useReportFlow(dependencies));
     await act(async () => {
       await result.current.getLocation();
     });
@@ -41,10 +45,10 @@ describe('useReportFlow', () => {
     await act(async () => {
       await result.current.review();
     });
-    expect(result.current.step).toBe('review');
+    assert.equal(result.current.step, 'review');
     await act(async () => {
       await result.current.confirm();
     });
-    expect(result.current.outcome.message).toBe('Your report was submitted.');
+    assert.equal(result.current.outcome.message, 'Your report was submitted.');
   });
 });

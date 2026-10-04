@@ -1,9 +1,11 @@
-import { describe, it, expect } from 'vitest';
+import assert from 'node:assert/strict';
+import { describe, it } from 'node:test';
 import { formatCoordinate } from './location';
+
 describe('formatCoordinate', () => {
   it('rounds to five decimals and omits missing', () => {
-    expect(formatCoordinate(51.5381435)).toBe('51.53814');
-    expect(formatCoordinate(-0.102)).toBe('-0.10200');
-    expect(formatCoordinate(undefined)).toBeNull();
+    assert.equal(formatCoordinate(51.5381435), '51.53814');
+    assert.equal(formatCoordinate(-0.102), '-0.10200');
+    assert.equal(formatCoordinate(undefined), null);
   });
 });

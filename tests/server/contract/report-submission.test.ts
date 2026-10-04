@@ -1,5 +1,6 @@
+import assert from 'node:assert/strict';
+import { describe, it } from 'node:test';
 import request from 'supertest';
-import { describe, expect, it } from 'vitest';
 import { createApp } from '../../../src/server/app.js';
 import { loadConfig } from '../../../src/server/config.js';
 
@@ -19,19 +20,21 @@ const valid = {
 };
 
 describe('POST /api/reports contract', () => {
-  it.each([
-    [{ ...valid, confirmed: false }],
-    [{ ...valid, location: undefined }],
-    [{ ...valid, description: '   ' }],
-    [{ ...valid, category: 'graffiti' }],
-    [{ ...valid, location: { ...valid.location, capturedAt: '2020-01-01T00:00:00.000Z' } }],
-  ])('rejects a report that violates the contract', async (body) => {
-    const response = await request(app)
-      .post('/api/reports')
-      .set('Origin', config.FRONTEND_ORIGIN)
-      .send(body);
-    expect(response.status).toBe(400);
-  });
+  for (const body of [
+    { ...valid, confirmed: false },
+    { ...valid, location: undefined },
+    { ...valid, description: '   ' },
+    { ...valid, category: 'graffiti' },
+    { ...valid, location: { ...valid.location, capturedAt: '2020-01-01T00:00:00.000Z' } },
+  ]) {
+    it('rejects a report that violates the contract', async () => {
+      const response = await request(app)
+        .post('/api/reports')
+        .set('Origin', config.FRONTEND_ORIGIN)
+        .send(body);
+      assert.equal(response.status, 400);
+    });
+  }
 });
 
 it('returns a confirmed outcome through the API when the mock target accepts the report', async () => {
@@ -52,8 +55,8 @@ it('returns a confirmed outcome through the API when the mock target accepts the
       .post('/api/reports')
       .set('Origin', 'https://frontend.example')
       .send(valid);
-    expect(response.status).toBe(200);
-    expect(response.body).toMatchObject({ state: 'confirmed', reference: 'MOCK-100' });
+    assert.equal(response.status, 200);
+    assert.partialDeepStrictEqual(response.body, { state: 'confirmed', reference: 'MOCK-100' });
   } finally {
     await new Promise<void>((resolve) => target.close(() => resolve()));
   }
