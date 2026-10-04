@@ -53,3 +53,12 @@ button {
   outline: 0.2rem solid #005a9c;
   outline-offset: 0.2rem;
 }
+.council {
+  font-weight: 700;
+}
+a:focus-visible,
+button:focus-visible,
+input:focus-visible {
+  outline: 3px solid #005ea5;
+  outline-offset: 2px;
+}

@@ -19,6 +19,7 @@ const config = (base: string) =>
     PORT: '3000',
     FRONTEND_ORIGIN: 'http://localhost:3000',
     TARGET_BASE_URL: base,
+    AUTHORITY_LOOKUP_BASE_URL: base,
     NEARBY_REPORTS_BASE_URL: base,
     NEARBY_REPORTS_DAYS: '30',
     RATE_LIMIT_WINDOW_MS: '60000',

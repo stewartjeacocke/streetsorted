@@ -18,6 +18,7 @@ async function withApp(run: (agent: ReturnType<typeof request.agent>) => Promise
       PORT: '3000',
       FRONTEND_ORIGIN: 'http://127.0.0.1:3000',
       TARGET_BASE_URL: base,
+      AUTHORITY_LOOKUP_BASE_URL: base,
       NEARBY_REPORTS_BASE_URL: base,
       NEARBY_REPORTS_DAYS: '30',
       RATE_LIMIT_WINDOW_MS: '60000',

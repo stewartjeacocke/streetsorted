@@ -26,6 +26,7 @@ const config = (target: string) =>
     PORT: '3000',
     FRONTEND_ORIGIN: 'http://localhost:3000',
     TARGET_BASE_URL: target,
+    AUTHORITY_LOOKUP_BASE_URL: target,
     RATE_LIMIT_WINDOW_MS: '60000',
     RATE_LIMIT_MAX: '10',
   });

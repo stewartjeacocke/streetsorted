@@ -73,9 +73,13 @@ test('retries an unconfirmed submission with ordinary form data', async ({ page 
   await page.getByLabel('Description').fill('ambiguous');
   await page.getByRole('button', { name: 'Review report' }).click();
   await page.getByRole('button', { name: 'Confirm submission' }).click();
-  await expect(page.getByText('We could not confirm that the report was submitted.')).toBeVisible();
+  await expect(
+    page.getByText('We could not confirm that the report was submitted to Islington Council.'),
+  ).toBeVisible();
   await page.getByRole('button', { name: 'Try submission again' }).click();
-  await expect(page.getByText('We could not confirm that the report was submitted.')).toBeVisible();
+  await expect(
+    page.getByText('We could not confirm that the report was submitted to Islington Council.'),
+  ).toBeVisible();
   await expect(
     page.getByText('Review a current location and explicitly confirm before submitting.'),
   ).toHaveCount(0);

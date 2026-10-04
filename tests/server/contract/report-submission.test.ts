@@ -47,6 +47,7 @@ it('returns a confirmed outcome through the API when the mock target accepts the
         PORT: '3000',
         FRONTEND_ORIGIN: 'https://frontend.example',
         TARGET_BASE_URL: `http://127.0.0.1:${port}`,
+        AUTHORITY_LOOKUP_BASE_URL: `http://127.0.0.1:${port}`,
         RATE_LIMIT_WINDOW_MS: '60000',
         RATE_LIMIT_MAX: '10',
       }),

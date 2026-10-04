@@ -161,3 +161,26 @@ describe('runtime template assets', () => {
     }
   });
 });
+
+it('renders a council website link instead of a report-details form when anonymous submission is unavailable', async () => {
+  const { detailsPage } = await import('../../../src/server/views/report-pages.js');
+  const html = detailsPage(
+    {
+      id: 'draft',
+      csrfToken: 'csrf',
+      stage: 'details',
+      councilProfileId: 'camden',
+      lastActivityAt: Date.now(),
+    },
+    [],
+    '',
+    'Camden Council',
+    'https://www.camden.gov.uk/fly-tipping-street-obstructions',
+  );
+  assert.match(
+    html,
+    /It is not possible to submit a report to Camden Council through this service/,
+  );
+  assert.match(html, /href="https:\/\/www\.camden\.gov\.uk\/fly-tipping-street-obstructions"/);
+  assert.doesNotMatch(html, /action="\/report\/details"/);
+});

@@ -13,6 +13,7 @@ async function appWithMock() {
     PORT: '3000',
     FRONTEND_ORIGIN: 'https://frontend.example',
     TARGET_BASE_URL: base,
+    AUTHORITY_LOOKUP_BASE_URL: base,
     NEARBY_REPORTS_BASE_URL: base,
     NEARBY_REPORTS_DAYS: '30',
     RATE_LIMIT_WINDOW_MS: '60000',

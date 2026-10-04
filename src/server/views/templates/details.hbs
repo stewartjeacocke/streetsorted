@@ -1,13 +1,19 @@
 {{#> layout title="Report details"}}
 <section>
   <h2>Tell us about the fly-tipping</h2>
-  <p><strong>Category:</strong> Fly-tipping</p>
-  {{> errors messages=messages}}
-  <form method="post" action="/report/details">
-    <input type="hidden" name="csrf" value="{{csrfToken}}">
-    <label>Description<textarea name="description" maxlength="1000" required>{{description}}</textarea></label>
-    <button type="submit">Review report</button>
-  </form>
+  <p class="council">Reporting to: {{councilName}}</p>
+  <p><a href="/report">Correct location</a></p>
+  {{#if councilSubmissionUnavailable}}
+    <p role="alert">It is not possible to submit a report to {{councilName}} through this service.</p>
+    <p><a href="{{councilSubmissionUrl}}">Submit a report on the {{councilName}} website</a></p>
+  {{else}}
+    {{> errors messages=messages}}
+    <form method="post" action="/report/details">
+      <input type="hidden" name="csrf" value="{{csrfToken}}">
+      <label>Description<textarea name="description" maxlength="1000" required>{{description}}</textarea></label>
+      <button type="submit">Review report</button>
+    </form>
+  {{/if}}
   <form method="post" action="/report/cancel">
     <input type="hidden" name="csrf" value="{{csrfToken}}">
     <button type="submit">Cancel</button>

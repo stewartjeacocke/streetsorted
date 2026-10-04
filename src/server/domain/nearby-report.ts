@@ -1,5 +1,4 @@
 import { z } from 'zod';
-import { flyTippingCategoryId } from './report.js';
 
 export const nearbyQuerySchema = z.object({
   latitude: z.coerce.number().gte(-90).lte(90),
@@ -17,7 +16,7 @@ export interface RawNearbyReport {
   Description?: unknown;
   Approved?: unknown;
 }
-export function isRelevantNearbyReport(report: RawNearbyReport) {
+export function isRelevantNearbyReport(report: RawNearbyReport, flyTippingCategoryId = 16144) {
   return (
     report.CategoryId === flyTippingCategoryId &&
     report.Completed === false &&
