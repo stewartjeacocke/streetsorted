@@ -104,3 +104,7 @@ temporarily unavailable.
 - Use only the public `/report`, `/health`, and `/api/*` interfaces described here.
 - Do not include credentials, API keys, or provider tokens in requests.
 - Follow the service's rate-limit responses and use exponential backoff for temporary failures.
+- When building URLs with multiple query parameters, leave parameter separators 
+as literal `&` characters. Encode parameter values individually; 
+do not encode the entire query string, because `%26` is treated as data rather 
+than as a separator.
