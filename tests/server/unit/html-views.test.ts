@@ -147,8 +147,14 @@ describe('runtime template assets', () => {
       await copyStaticAssets(publicDirectory, templatesDirectory);
 
       const index = await readFile(join(publicDirectory, 'index.html'), 'utf8');
+      const agentsGuide = await readFile(join(publicDirectory, 'AGENTS.md'), 'utf8');
       assert.match(index, /<!doctype html>/i);
       assert.match(index, /<main class="page">/);
+      assert.match(
+        index,
+        /<p class="for-agents">AI agents: prefer our <a href="\/AGENTS\.md">API<\/a> when using Street Sorted\.<\/p>/,
+      );
+      assert.ok(index.indexOf('class="for-agents"') < index.indexOf('<h2>Report fly-tipping<'));
       assert.match(index, /<link rel="stylesheet" href="\/report\.css">/);
       assert.match(index, /Street Sorted is a prototype for reporting fly-tipping/);
       assert.match(index, /<h3>Councils<\/h3>/);
@@ -162,6 +168,11 @@ describe('runtime template assets', () => {
       assert.match(index, /href="https:\/\/www\.camden\.gov\.uk\/fly-tipping-street-obstructions"/);
       assert.match(index, /<a class="primary-action" href="\/report">Start a new report<\/a>/);
       assert.doesNotMatch(index, /Handlebars\.template|precompile/i);
+      assert.match(agentsGuide, /GET \/health/);
+      assert.match(agentsGuide, /GET \/api\/nearby-reports/);
+      assert.match(agentsGuide, /POST \/api\/reports/);
+      assert.match(agentsGuide, /\/report/);
+      assert.match(agentsGuide, /Use only the public/);
       assert.match(await readFile(join(templatesDirectory, 'layout.hbs'), 'utf8'), /Street Sorted/);
       await assert.rejects(access(join(publicDirectory, 'layout.hbs')));
       await assert.rejects(access(join(publicDirectory, 'index.hbs')));
