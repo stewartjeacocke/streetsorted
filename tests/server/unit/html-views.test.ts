@@ -139,14 +139,23 @@ describe('templated report pages', () => {
 });
 
 describe('runtime template assets', () => {
-  it('copies private view templates beside compiled server views without serving them publicly', async () => {
+  it('renders the private index template to public HTML without publishing template sources', async () => {
     const temporaryDirectory = await mkdtemp(join(tmpdir(), 'street-sorted-assets-'));
     const publicDirectory = join(temporaryDirectory, 'public');
     const templatesDirectory = join(temporaryDirectory, 'views', 'templates');
     try {
       await copyStaticAssets(publicDirectory, templatesDirectory);
+
+      const index = await readFile(join(publicDirectory, 'index.html'), 'utf8');
+      assert.match(index, /<!doctype html>/i);
+      assert.match(index, /<main class="page">/);
+      assert.match(index, /<link rel="stylesheet" href="\/report\.css">/);
+      assert.match(index, /Street Sorted is a prototype for reporting fly-tipping/);
+      assert.match(index, /<a class="primary-action" href="\/report">Start a new report<\/a>/);
+      assert.doesNotMatch(index, /Handlebars\.template|precompile/i);
       assert.match(await readFile(join(templatesDirectory, 'layout.hbs'), 'utf8'), /Street Sorted/);
       await assert.rejects(access(join(publicDirectory, 'layout.hbs')));
+      await assert.rejects(access(join(publicDirectory, 'index.hbs')));
     } finally {
       await rm(temporaryDirectory, { recursive: true, force: true });
     }

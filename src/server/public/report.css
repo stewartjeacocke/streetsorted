@@ -36,3 +36,20 @@ button {
   border-left: 0.25rem solid #b00020;
   padding-left: 1rem;
 }
+.primary-action {
+  display: inline-block;
+  margin: 0.5rem 0;
+  padding: 0.65rem 1rem;
+  color: #fff;
+  background: #17212b;
+  border-radius: 0.25rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+.primary-action:hover {
+  background: #314150;
+}
+.primary-action:focus-visible {
+  outline: 0.2rem solid #005a9c;
+  outline-offset: 0.2rem;
+}
