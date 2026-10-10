@@ -8,16 +8,17 @@
   "scripts": {
     "dev": "tsx watch src/server/dev-server.ts",
     "dev:mock-target": "tsx src/server/dev/mock-target-server.ts",
-    "build": "npm run build:server && npm run build:assets",
-    "build:server": "tsc -p tsconfig.server.json",
+    "build": "npm run build:server && npm run build:static-site",
+    "build:server": "rm -rf dist/server && tsc -p tsconfig.server.json && tsx src/server/dev/server-assets.ts",
     "start": "node dist/server/server.js",
-    "test": "npm run test:server",
+    "test": "npm run test:server && npm run test:static-site",
     "test:server": "tsx --test tests/server/**/*.test.ts",
     "test:contract": "tsx --test tests/server/contract/*.test.ts",
     "test:e2e": "playwright test --config=playwright.config.ts",
     "lint": "eslint src tests",
     "format": "prettier --check .",
-    "build:assets": "tsx src/server/dev/static-assets.ts"
+    "build:static-site": "tsx src/static-site/build.ts",
+    "test:static-site": "tsx --test tests/static-site/**/*.test.ts"
   },
   "dependencies": {
     "axios": "^1.8.4",

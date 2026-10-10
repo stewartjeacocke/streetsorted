@@ -1,4 +1,5 @@
 import type { AppConfig } from '../config.js';
+import { defaultPublicCouncilProfiles } from '../domain/public-councils.js';
 import {
   councilProfileSchema,
   type CouncilProfile,
@@ -21,6 +22,22 @@ export class CouncilDirectory {
   get(id: string | undefined) {
     return this.profiles.find((profile) => profile.id === id && profile.active) ?? null;
   }
+}
+
+export type PublicCouncilProfile = Pick<
+  CouncilProfile,
+  'id' | 'displayName' | 'anonymousSubmissionAvailable' | 'councilSubmissionUrl'
+>;
+
+export function publicCouncilProfilesFromConfig(config: AppConfig): PublicCouncilProfile[] {
+  return councilDirectoryFromConfig(config).profiles.map(
+    ({ id, displayName, anonymousSubmissionAvailable, councilSubmissionUrl }) => ({
+      id,
+      displayName,
+      anonymousSubmissionAvailable,
+      councilSubmissionUrl,
+    }),
+  );
 }
 
 export function councilDirectoryFromConfig(config: AppConfig) {
@@ -161,7 +178,14 @@ export function councilDirectoryFromConfig(config: AppConfig) {
         'https://www.redbridge.gov.uk/rubbish-recycling-and-environment/fly-tipping/',
     },
   ];
-  const raw = config.COUNCIL_PROFILES ? JSON.parse(config.COUNCIL_PROFILES) : fallback;
+  const publicProfiles = new Map(
+    defaultPublicCouncilProfiles.map((profile) => [profile.id, profile]),
+  );
+  const sharedFallback = fallback.map((profile) => ({
+    ...profile,
+    ...publicProfiles.get(profile.id),
+  }));
+  const raw = config.COUNCIL_PROFILES ? JSON.parse(config.COUNCIL_PROFILES) : sharedFallback;
   return new CouncilDirectory(zProfiles(raw));
 }
 function zProfiles(raw: unknown): CouncilProfile[] {

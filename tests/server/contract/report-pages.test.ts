@@ -7,7 +7,7 @@ import { describe, it } from 'node:test';
 import request from 'supertest';
 import { createApp } from '../../../src/server/app.js';
 import { loadConfig } from '../../../src/server/config.js';
-import { copyStaticAssets } from '../../../src/server/dev/static-assets.js';
+import { buildStaticSite } from '../../../src/static-site/build.js';
 import { createMockTarget } from '../support/mock-target.js';
 
 async function withApp(run: (agent: ReturnType<typeof request.agent>) => Promise<void>) {
@@ -67,9 +67,11 @@ describe('static prototype landing page', () => {
   it('serves the generated root document with the prototype introduction and report-start link', async () => {
     const temporaryDirectory = await mkdtemp(join(tmpdir(), 'street-sorted-landing-'));
     const publicDirectory = join(temporaryDirectory, 'public');
-    const templatesDirectory = join(temporaryDirectory, 'views', 'templates');
     try {
-      await copyStaticAssets(publicDirectory, templatesDirectory);
+      await buildStaticSite(
+        { PUBLIC_SERVER_BASE_URL: 'http://127.0.0.1:3000', SOURCE_REVISION: 'test' },
+        publicDirectory,
+      );
       const app = createApp(
         loadConfig({
           PORT: '3000',
@@ -89,7 +91,7 @@ describe('static prototype landing page', () => {
       assert.match(response.text, /Street Sorted is a prototype for reporting fly-tipping/);
       assert.match(
         response.text,
-        /<a class="primary-action" href="\/report">Start a new report<\/a>/,
+        /<a class="primary-action" href="http:\/\/127\.0\.0\.1:3000\/report">Start a new report<\/a>/,
       );
       assert.match(response.text, /<h3>Councils<\/h3>/);
       assert.match(response.text, /Islington Council/);

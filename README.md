@@ -54,3 +54,29 @@ npm test
 npm run lint
 npm run test:e2e
 ```
+
+## Independent release artifacts
+
+Set `SOURCE_REVISION` for every release (and pass it to Docker with `--build-arg SOURCE_REVISION=...`). Run `npm run build:static-site` with public `PUBLIC_SERVER_BASE_URL` to create `dist/static-site`; publish that directory to a static host. Run `npm run build:server` to create `dist/server` for the Node.js service. Each artifact has `release.json` with `artifactType` and `sourceRevision`.
+
+### Static-site deployment
+
+1. Set `PUBLIC_SERVER_BASE_URL` to the public origin of the deployed Node.js reporting service and set
+   `SOURCE_REVISION` to the revision being released.
+2. Run `npm run build:static-site` and publish the contents of `dist/static-site/` to the chosen static
+   host as ordinary files.
+3. Before publishing, verify `dist/static-site/release.json` has `"artifactType": "static-site"` and the
+   expected `sourceRevision`. Do not add credentials or server configuration to this directory.
+
+### Server deployment
+
+1. Set `SOURCE_REVISION` to the revision being released and provide normal server runtime configuration
+   through the deployment environment.
+2. Run `npm run build:server`, or build the container with
+   `docker build --build-arg SOURCE_REVISION="$SOURCE_REVISION" -t street-sorted .`.
+3. Deploy `dist/server/` (or the built image) to the Node.js runtime, then verify `/health` and the
+   `/report` flow.
+4. Verify `dist/server/release.json` has `"artifactType": "server"` and the expected `sourceRevision`.
+
+The artifacts can be released independently. A static-only change does not require a server deployment; a
+server-only change does not require republishing the static site.

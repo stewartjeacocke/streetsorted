@@ -4,7 +4,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, it } from 'node:test';
 import type { NearbyResult } from '../../../src/server/domain/nearby-report.js';
-import { copyStaticAssets } from '../../../src/server/dev/static-assets.js';
+import { buildStaticSite } from '../../../src/static-site/build.js';
 import type { ReportDraftSession } from '../../../src/server/services/report-draft-session-store.js';
 import {
   detailsPage,
@@ -142,9 +142,11 @@ describe('runtime template assets', () => {
   it('renders the private index template to public HTML without publishing template sources', async () => {
     const temporaryDirectory = await mkdtemp(join(tmpdir(), 'street-sorted-assets-'));
     const publicDirectory = join(temporaryDirectory, 'public');
-    const templatesDirectory = join(temporaryDirectory, 'views', 'templates');
     try {
-      await copyStaticAssets(publicDirectory, templatesDirectory);
+      await buildStaticSite(
+        { PUBLIC_SERVER_BASE_URL: 'http://127.0.0.1:3000', SOURCE_REVISION: 'test' },
+        publicDirectory,
+      );
 
       const index = await readFile(join(publicDirectory, 'index.html'), 'utf8');
       const agentsGuide = await readFile(join(publicDirectory, 'AGENTS.md'), 'utf8');
@@ -166,14 +168,16 @@ describe('runtime template assets', () => {
         /Street Sorted cannot submit a new fly-tipping report; use the council website\./,
       );
       assert.match(index, /href="https:\/\/www\.camden\.gov\.uk\/fly-tipping-street-obstructions"/);
-      assert.match(index, /<a class="primary-action" href="\/report">Start a new report<\/a>/);
+      assert.match(
+        index,
+        /<a class="primary-action" href="http:\/\/127\.0\.0\.1:3000\/report">Start a new report<\/a>/,
+      );
       assert.doesNotMatch(index, /Handlebars\.template|precompile/i);
-      assert.match(agentsGuide, /GET \/health/);
-      assert.match(agentsGuide, /GET \/api\/nearby-reports/);
-      assert.match(agentsGuide, /POST \/api\/reports/);
+      assert.match(agentsGuide, /`GET\s+http:\/\/127\.0\.0\.1:3000\/health`/);
+      assert.match(agentsGuide, /`GET\s+http:\/\/127\.0\.0\.1:3000\/api\/nearby-reports/);
+      assert.match(agentsGuide, /`POST\s+http:\/\/127\.0\.0\.1:3000\/api\/reports`/);
       assert.match(agentsGuide, /\/report/);
-      assert.match(agentsGuide, /Use only the public/);
-      assert.match(await readFile(join(templatesDirectory, 'layout.hbs'), 'utf8'), /Street Sorted/);
+      assert.match(agentsGuide, /Use only the public `http:\/\/127\.0\.0\.1:3000\/report`/);
       await assert.rejects(access(join(publicDirectory, 'layout.hbs')));
       await assert.rejects(access(join(publicDirectory, 'index.hbs')));
     } finally {

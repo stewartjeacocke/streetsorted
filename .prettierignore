@@ -14,3 +14,6 @@ src/server/views/templates/
 .specify/
 coding-agents-at-ibm/
 specs/
+
+# Static-site Handlebars templates are rendered Markdown and must preserve code spans.
+src/static-site/templates/

@@ -3,8 +3,8 @@
 If you are an automated agent using this deployed service, use the public Street Sorted interfaces
 below.
 
-All paths below are relative to the origin serving this document. For example, if you retrieved this
-file from `https://service.example/AGENTS.md`, use `https://service.example/api/reports`.
+All server endpoints below use `{{serverBaseUrl}}`. For example, use
+`{{serverBaseUrl}}/api/reports`.
 
 ## Prefer these interfaces
 
@@ -15,7 +15,7 @@ file from `https://service.example/AGENTS.md`, use `https://service.example/api/
 
 ## Health check
 
-### `GET /health`
+### `GET {{serverBaseUrl}}/health`
 
 Use this endpoint to check that the service is running.
 
@@ -27,7 +27,7 @@ Successful response:
 
 ## Find nearby fly-tipping reports
 
-### `GET /api/nearby-reports?latitude={number}&longitude={number}`
+### `GET {{serverBaseUrl}}/api/nearby-reports?latitude={number}&longitude={number}`
 
 Use this before creating a report to identify nearby active fly-tipping reports. The service routes
 the coordinate to the appropriate configured council automatically.
@@ -57,7 +57,7 @@ unavailable; retry later rather than contacting a council directly.
 
 ## Submit a fly-tipping report
 
-### `POST /api/reports`
+### `POST {{serverBaseUrl}}/api/reports`
 
 Send JSON with `Content-Type: application/json`.
 
@@ -101,7 +101,7 @@ temporarily unavailable.
 
 ## Safe use rules
 
-- Use only the public `/report`, `/health`, and `/api/*` interfaces described here.
+- Use only the public `{{serverBaseUrl}}/report`, `{{serverBaseUrl}}/health`, and `{{serverBaseUrl}}/api/*` interfaces described here.
 - Do not include credentials, API keys, or provider tokens in requests.
 - Follow the service's rate-limit responses and use exponential backoff for temporary failures.
 - When building URLs with multiple query parameters, leave parameter separators 

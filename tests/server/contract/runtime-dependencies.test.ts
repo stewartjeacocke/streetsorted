@@ -22,6 +22,8 @@ describe('runtime dependencies', () => {
     assert.equal(pkg.scripts['test:client'], undefined);
     await assert.rejects(access('tsconfig.client.json'));
     await assert.rejects(access('src/client'));
-    assert.equal(pkg.scripts['build:assets'], 'tsx src/server/dev/static-assets.ts');
+    assert.equal(pkg.scripts['build:static-site'], 'tsx src/static-site/build.ts');
+    assert.match(pkg.scripts['build:server'], /server-assets/);
+    assert.match(pkg.scripts.build, /build:static-site/);
   });
 });

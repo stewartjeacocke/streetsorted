@@ -3,8 +3,10 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm ci
 COPY tsconfig.server.json ./
+ARG SOURCE_REVISION
+ENV SOURCE_REVISION=$SOURCE_REVISION
 COPY src ./src
-RUN npm run build && npm prune --omit=dev
+RUN npm run build:server && npm prune --omit=dev
 
 FROM node:26-bookworm-slim
 WORKDIR /app
