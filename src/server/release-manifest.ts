@@ -9,14 +9,23 @@ export function sourceRevision(values = process.env) {
   return sourceRevisionSchema.parse(values.SOURCE_REVISION);
 }
 
+export function optionalSourceRevision(values = process.env) {
+  const revision = values.SOURCE_REVISION?.trim();
+  return revision || undefined;
+}
+
 export async function writeReleaseManifest(
   directory: string,
   artifactType: ArtifactType,
-  revision = sourceRevision(),
+  revision?: string,
 ) {
   await mkdir(directory, { recursive: true });
   await writeFile(
     resolve(directory, 'release.json'),
-    `${JSON.stringify({ artifactType, sourceRevision: revision }, null, 2)}\n`,
+    `${JSON.stringify(
+      { artifactType, ...(revision ? { sourceRevision: revision } : {}) },
+      null,
+      2,
+    )}\n`,
   );
 }

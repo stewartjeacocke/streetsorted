@@ -1,7 +1,7 @@
 import { cp, mkdir, rm } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { writeReleaseManifest } from '../release-manifest.js';
+import { optionalSourceRevision, writeReleaseManifest } from '../release-manifest.js';
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../../..');
 export const serverDirectory = resolve(root, 'dist/server');
 export const serverPublicDirectory = resolve(serverDirectory, 'public');
@@ -25,6 +25,6 @@ export async function copyServerAssets() {
     resolve(runtimeTemplateDirectory, 'layout.hbs'),
   );
   await cp(resolve(root, 'src/server/openapi.yaml'), resolve(serverDirectory, 'openapi.yaml'));
-  await writeReleaseManifest(serverDirectory, 'server');
+  await writeReleaseManifest(serverDirectory, 'server', optionalSourceRevision());
 }
 if (process.argv[1] === fileURLToPath(import.meta.url)) await copyServerAssets();

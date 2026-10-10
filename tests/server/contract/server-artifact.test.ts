@@ -8,11 +8,10 @@ describe('server artifact contract', () => {
   it('builds dynamic assets and manifest without a static landing entry document', async () => {
     await rm('dist', { recursive: true, force: true });
     await execFileAsync('npm', ['run', 'build:server'], {
-      env: { ...process.env, SOURCE_REVISION: 'server-abc' },
+      env: { ...process.env, SOURCE_REVISION: '' },
     });
     assert.deepEqual(JSON.parse(await readFile('dist/server/release.json', 'utf8')), {
       artifactType: 'server',
-      sourceRevision: 'server-abc',
     });
     await access('dist/server/public/report.css');
     await access('dist/server/public/location-helper.js');
@@ -20,5 +19,15 @@ describe('server artifact contract', () => {
     await assert.rejects(access('dist/server/views/templates/index.hbs'));
     await assert.rejects(access('dist/server/public/index.html'));
     await assert.rejects(access('dist/static-site'));
+  });
+
+  it('records a source revision when a direct server build supplies one', async () => {
+    await execFileAsync('npm', ['run', 'build:server'], {
+      env: { ...process.env, SOURCE_REVISION: 'server-abc' },
+    });
+    assert.deepEqual(JSON.parse(await readFile('dist/server/release.json', 'utf8')), {
+      artifactType: 'server',
+      sourceRevision: 'server-abc',
+    });
   });
 });

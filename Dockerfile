@@ -3,8 +3,6 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm ci
 COPY tsconfig.server.json ./
-ARG SOURCE_REVISION
-ENV SOURCE_REVISION=$SOURCE_REVISION
 COPY src ./src
 RUN npm run build:server && npm prune --omit=dev
 
