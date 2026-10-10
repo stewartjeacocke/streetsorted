@@ -170,7 +170,7 @@ describe('runtime template assets', () => {
       assert.match(index, /href="https:\/\/www\.camden\.gov\.uk\/fly-tipping-street-obstructions"/);
       assert.match(
         index,
-        /<a class="primary-action" href="http:\/\/127\.0\.0\.1:3000\/report">Start a new report<\/a>/,
+        /<a class="primary-action" href="\.\/starting-report\.html">Start a new report<\/a>/,
       );
       assert.doesNotMatch(index, /Handlebars\.template|precompile/i);
       assert.match(agentsGuide, /`GET\s+http:\/\/127\.0\.0\.1:3000\/health`/);

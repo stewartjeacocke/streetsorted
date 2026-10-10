@@ -18,9 +18,10 @@ export async function buildStaticSite(values = process.env, destination = out) {
     await mkdir(destination, { recursive: true });
     await cp(resolve(sharedPublicSource, 'report.css'), resolve(destination, 'report.css'));
     const handlebars = Handlebars.create();
-    const [layout, index, agentsTemplate] = await Promise.all([
+    const [layout, index, startingReport, agentsTemplate] = await Promise.all([
       readFile(resolve(sharedTemplateSource, 'layout.hbs'), 'utf8'),
       readFile(resolve(staticTemplateSource, 'index.hbs'), 'utf8'),
+      readFile(resolve(staticTemplateSource, 'starting-report.hbs'), 'utf8'),
       readFile(resolve(staticTemplateSource, 'AGENTS.md.hbs'), 'utf8'),
     ]);
     await writeFile(
@@ -40,6 +41,14 @@ export async function buildStaticSite(values = process.env, destination = out) {
       locationHelper: false,
     });
     await writeFile(resolve(destination, 'index.html'), html);
+    await writeFile(
+      resolve(destination, 'starting-report.html'),
+      handlebars.compile(startingReport)({
+        resourceBaseUrl: './',
+        reportUrl: `${config.publicServerBaseUrl}/report`,
+        locationHelper: false,
+      }),
+    );
     await writeReleaseManifest(destination, 'static-site', config.sourceRevision);
     await validateStaticSite(destination);
   } catch (error) {
@@ -50,7 +59,13 @@ export async function buildStaticSite(values = process.env, destination = out) {
 
 export async function validateStaticSite(directory: string) {
   const names = new Set(await readdir(directory));
-  for (const required of ['index.html', 'report.css', 'AGENTS.md', 'release.json'])
+  for (const required of [
+    'index.html',
+    'starting-report.html',
+    'report.css',
+    'AGENTS.md',
+    'release.json',
+  ])
     if (!names.has(required)) throw new Error(`Static package is missing ${required}`);
   const files = await Promise.all(
     [...names].map(
@@ -63,13 +78,16 @@ export async function validateStaticSite(directory: string) {
       /AUTHORITY_LOOKUP_API_KEY|BEGIN (?:RSA |OPENSSH )?PRIVATE KEY/i.test(value)
     )
       throw new Error(`Static package contains prohibited content: ${name}`);
-  const html = await readFile(resolve(directory, 'index.html'), 'utf8');
-  for (const match of html.matchAll(/(?:href|src)="([^"]+)"/g)) {
-    const reference = match[1];
-    if (/^(?:[a-z][a-z0-9+.-]*:|#|\/\/)/i.test(reference)) continue;
-    const asset = reference.replace(/^\.\//, '').replace(/^\//, '').split(/[?#]/, 1)[0];
-    if (asset && !names.has(asset))
-      throw new Error(`Static package references missing local asset: ${asset}`);
+  const htmlFiles = [...names].filter((name) => name.endsWith('.html'));
+  for (const htmlFile of htmlFiles) {
+    const html = await readFile(resolve(directory, htmlFile), 'utf8');
+    for (const match of html.matchAll(/(?:href|src)="([^"]+)"/g)) {
+      const reference = match[1];
+      if (/^(?:[a-z][a-z0-9+.-]*:|#|\/\/)/i.test(reference)) continue;
+      const asset = reference.replace(/^\.\//, '').replace(/^\//, '').split(/[?#]/, 1)[0];
+      if (asset && !names.has(asset))
+        throw new Error(`Static package references missing local asset: ${asset}`);
+    }
   }
 }
 

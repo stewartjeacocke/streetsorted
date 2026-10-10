@@ -13,14 +13,21 @@ describe('static-site artifact contract', () => {
         { PUBLIC_SERVER_BASE_URL: 'https://reports.example.test', SOURCE_REVISION: 'abc123' },
         directory,
       );
-      const [html, manifest, agents] = await Promise.all(
-        ['index.html', 'release.json', 'AGENTS.md'].map((file) =>
+      const [html, startingReport, manifest, agents] = await Promise.all(
+        ['index.html', 'starting-report.html', 'release.json', 'AGENTS.md'].map((file) =>
           readFile(join(directory, file), 'utf8'),
         ),
       );
       await access(join(directory, 'report.css'));
       assert.match(html, /href="\.\/AGENTS\.md"/);
-      assert.match(html, /href="https:\/\/reports\.example\.test\/report"/);
+      assert.doesNotMatch(html, /http-equiv="refresh"/);
+      assert.match(html, /href="\.\/starting-report\.html"/);
+      assert.match(
+        startingReport,
+        /http-equiv="refresh" content="1; url=https:\/\/reports\.example\.test\/report"/,
+      );
+      assert.match(startingReport, /href="https:\/\/reports\.example\.test\/report"/);
+      assert.match(startingReport, /href="\.\/report\.css"/);
       assert.match(html, /<link rel="stylesheet" href="\.\/report\.css">/);
       assert.doesNotMatch(html, /<script/i);
       assert.deepEqual(JSON.parse(manifest), {

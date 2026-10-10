@@ -38,7 +38,7 @@ function assertSharedDocument(html: string, locationHelper = false) {
   assert.match(html, /<title>[^<]+ \| Street Sorted<\/title>/);
   assert.match(html, /<main class="page">/);
   assert.equal(/location-helper\.js/.test(html), locationHelper);
-  assert.doesNotMatch(html, /id="root"|main\.js|react/i);
+  assert.doesNotMatch(html, /id="root"|main\.js|react|http-equiv="refresh"/i);
 }
 
 function csrf(html: string) {
@@ -91,7 +91,7 @@ describe('static prototype landing page', () => {
       assert.match(response.text, /Street Sorted is a prototype for reporting fly-tipping/);
       assert.match(
         response.text,
-        /<a class="primary-action" href="http:\/\/127\.0\.0\.1:3000\/report">Start a new report<\/a>/,
+        /<a class="primary-action" href="\.\/starting-report\.html">Start a new report<\/a>/,
       );
       assert.match(response.text, /<h3>Councils<\/h3>/);
       assert.match(response.text, /Islington Council/);
