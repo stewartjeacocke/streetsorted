@@ -1,5 +1,5 @@
 import Handlebars from 'handlebars';
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -43,11 +43,13 @@ export function createRenderer(sources: TemplateSources): Renderer {
 function loadRuntimeTemplateSources() {
   const currentDirectory = dirname(fileURLToPath(import.meta.url));
   const templateDirectory = resolve(currentDirectory, 'templates');
+  const sharedLayout = resolve(currentDirectory, '../../shared/templates/layout.hbs');
   return Object.fromEntries(
-    runtimeTemplateNames.map((name) => [
-      name,
-      readFileSync(resolve(templateDirectory, `${name}.hbs`), 'utf8'),
-    ]),
+    runtimeTemplateNames.map((name) => {
+      const runtimePath = resolve(templateDirectory, `${name}.hbs`);
+      const sourcePath = name === 'layout' && !existsSync(runtimePath) ? sharedLayout : runtimePath;
+      return [name, readFileSync(sourcePath, 'utf8')];
+    }),
   ) as TemplateSources;
 }
 
@@ -57,5 +59,5 @@ export function renderReportPage(
   templateName: Exclude<(typeof runtimeTemplateNames)[number], 'layout' | 'errors'>,
   context: ViewContext,
 ) {
-  return renderRuntimeTemplate(templateName, context);
+  return renderRuntimeTemplate(templateName, { resourceBaseUrl: '/', ...context });
 }

@@ -16,7 +16,8 @@ describe('server artifact contract', () => {
     });
     await access('dist/server/public/report.css');
     await access('dist/server/public/location-helper.js');
-    await access('dist/server/views/templates/index.hbs');
+    await access('dist/server/views/templates/layout.hbs');
+    await assert.rejects(access('dist/server/views/templates/index.hbs'));
     await assert.rejects(access('dist/server/public/index.html'));
     await assert.rejects(access('dist/static-site'));
   });

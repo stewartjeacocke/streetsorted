@@ -17,3 +17,6 @@ specs/
 
 # Static-site Handlebars templates are rendered Markdown and must preserve code spans.
 src/static-site/templates/
+
+# Shared Handlebars templates use partial blocks unsupported by Prettier.
+src/shared/templates/

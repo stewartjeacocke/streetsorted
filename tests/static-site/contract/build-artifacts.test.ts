@@ -19,8 +19,9 @@ describe('static-site artifact contract', () => {
         ),
       );
       await access(join(directory, 'report.css'));
+      assert.match(html, /href="\.\/AGENTS\.md"/);
       assert.match(html, /href="https:\/\/reports\.example\.test\/report"/);
-      assert.match(html, /<link rel="stylesheet" href="\/report\.css">/);
+      assert.match(html, /<link rel="stylesheet" href="\.\/report\.css">/);
       assert.doesNotMatch(html, /<script/i);
       assert.deepEqual(JSON.parse(manifest), {
         artifactType: 'static-site',
@@ -42,7 +43,7 @@ describe('static-site artifact contract', () => {
         { PUBLIC_SERVER_BASE_URL: 'https://reports.example.test', SOURCE_REVISION: 'abc123' },
         directory,
       );
-      await writeFile(join(directory, 'index.html'), '<link href="/missing.css">');
+      await writeFile(join(directory, 'index.html'), '<link href="./missing.css">');
       await assert.rejects(
         () => validateStaticSite(directory),
         /missing local asset: missing\.css/,

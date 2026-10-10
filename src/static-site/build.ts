@@ -9,7 +9,7 @@ const root = resolve(import.meta.dirname, '../..');
 const out = resolve(root, 'dist/static-site');
 const sharedPublicSource = resolve(root, 'src/shared/public');
 const staticTemplateSource = resolve(root, 'src/static-site/templates');
-const serverTemplateSource = resolve(root, 'src/server/views/templates');
+const sharedTemplateSource = resolve(root, 'src/shared/templates');
 
 export async function buildStaticSite(values = process.env, destination = out) {
   const config = staticSiteConfig(values);
@@ -19,8 +19,8 @@ export async function buildStaticSite(values = process.env, destination = out) {
     await cp(resolve(sharedPublicSource, 'report.css'), resolve(destination, 'report.css'));
     const handlebars = Handlebars.create();
     const [layout, index, agentsTemplate] = await Promise.all([
-      readFile(resolve(serverTemplateSource, 'layout.hbs'), 'utf8'),
-      readFile(resolve(serverTemplateSource, 'index.hbs'), 'utf8'),
+      readFile(resolve(sharedTemplateSource, 'layout.hbs'), 'utf8'),
+      readFile(resolve(staticTemplateSource, 'index.hbs'), 'utf8'),
       readFile(resolve(staticTemplateSource, 'AGENTS.md.hbs'), 'utf8'),
     ]);
     await writeFile(
@@ -33,9 +33,12 @@ export async function buildStaticSite(values = process.env, destination = out) {
       councilSubmissionUrl: profile.councilSubmissionUrl,
       supported: profile.anonymousSubmissionAvailable,
     }));
-    const html = handlebars
-      .compile(index)({ councils })
-      .replace('href="/report"', `href="${config.publicServerBaseUrl}/report"`);
+    const html = handlebars.compile(index)({
+      councils,
+      resourceBaseUrl: './',
+      serverBaseUrl: config.publicServerBaseUrl,
+      locationHelper: false,
+    });
     await writeFile(resolve(destination, 'index.html'), html);
     await writeReleaseManifest(destination, 'static-site', config.sourceRevision);
     await validateStaticSite(destination);
@@ -63,11 +66,10 @@ export async function validateStaticSite(directory: string) {
   const html = await readFile(resolve(directory, 'index.html'), 'utf8');
   for (const match of html.matchAll(/(?:href|src)="([^"]+)"/g)) {
     const reference = match[1];
-    if (reference.startsWith('/') && !reference.startsWith('//')) {
-      const asset = reference.slice(1).split(/[?#]/, 1)[0];
-      if (!names.has(asset))
-        throw new Error(`Static package references missing local asset: ${asset}`);
-    }
+    if (/^(?:[a-z][a-z0-9+.-]*:|#|\/\/)/i.test(reference)) continue;
+    const asset = reference.replace(/^\.\//, '').replace(/^\//, '').split(/[?#]/, 1)[0];
+    if (asset && !names.has(asset))
+      throw new Error(`Static package references missing local asset: ${asset}`);
   }
 }
 

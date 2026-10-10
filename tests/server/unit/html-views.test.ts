@@ -154,10 +154,10 @@ describe('runtime template assets', () => {
       assert.match(index, /<main class="page">/);
       assert.match(
         index,
-        /<p class="for-agents">AI agents: prefer our <a href="\/AGENTS\.md">API<\/a> when using Street Sorted\.<\/p>/,
+        /<p class="for-agents">AI agents: prefer our <a href="\.\/AGENTS\.md">API<\/a> when using Street Sorted\.<\/p>/,
       );
       assert.ok(index.indexOf('class="for-agents"') < index.indexOf('<h2>Report fly-tipping<'));
-      assert.match(index, /<link rel="stylesheet" href="\/report\.css">/);
+      assert.match(index, /<link rel="stylesheet" href="\.\/report\.css">/);
       assert.match(index, /Street Sorted is a prototype for reporting fly-tipping/);
       assert.match(index, /<h3>Councils<\/h3>/);
       assert.match(index, /Islington Council/);

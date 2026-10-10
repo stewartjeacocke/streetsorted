@@ -16,10 +16,13 @@ export async function copyServerAssets() {
     resolve(root, 'src/server/public/location-helper.js'),
     resolve(serverPublicDirectory, 'location-helper.js'),
   );
+  const runtimeTemplateDirectory = resolve(serverDirectory, 'views/templates');
+  await cp(resolve(root, 'src/server/views/templates'), runtimeTemplateDirectory, {
+    recursive: true,
+  });
   await cp(
-    resolve(root, 'src/server/views/templates'),
-    resolve(serverDirectory, 'views/templates'),
-    { recursive: true },
+    resolve(root, 'src/shared/templates/layout.hbs'),
+    resolve(runtimeTemplateDirectory, 'layout.hbs'),
   );
   await writeReleaseManifest(serverDirectory, 'server');
 }
