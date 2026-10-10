@@ -74,7 +74,8 @@ Run `npm run build:static-site` with public `PUBLIC_SERVER_BASE_URL` and `SOURCE
    a source revision in a direct build, set `SOURCE_REVISION` before running `npm run build:server`.
 2. Run `npm run build:server`, or build the container with `docker build -t street-sorted .`.
 3. Deploy `dist/server/` (or the built image) to the Node.js runtime, then verify `/health` and the
-   `/report` flow.
+   `/report` flow. On `SIGTERM`, the production server stops accepting connections and drains active
+   requests for up to 30 seconds before it terminates.
 4. Verify `dist/server/release.json` has `"artifactType": "server"`. It has `sourceRevision` only for a
    direct build that supplied `SOURCE_REVISION`.
 
