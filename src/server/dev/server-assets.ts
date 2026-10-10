@@ -24,6 +24,7 @@ export async function copyServerAssets() {
     resolve(root, 'src/shared/templates/layout.hbs'),
     resolve(runtimeTemplateDirectory, 'layout.hbs'),
   );
+  await cp(resolve(root, 'src/server/openapi.yaml'), resolve(serverDirectory, 'openapi.yaml'));
   await writeReleaseManifest(serverDirectory, 'server');
 }
 if (process.argv[1] === fileURLToPath(import.meta.url)) await copyServerAssets();

@@ -1,4 +1,6 @@
 import express from 'express';
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import type { AppConfig } from './config.js';
 import { requestLogger } from './middleware/logger.js';
 import { apiCors, securityHeaders } from './middleware/security.js';
@@ -9,6 +11,7 @@ import { MapItAuthorityLookup } from './adapters/authority-lookup/mapit.js';
 import { councilDirectoryFromConfig } from './services/council-directory.js';
 import { CouncilRoutingService } from './services/council-routing-service.js';
 type AppOptions = { staticDirectory?: string; routingService?: CouncilRoutingService };
+const openapiYamlPath = resolve(dirname(fileURLToPath(import.meta.url)), 'openapi.yaml');
 const notFound = (req: express.Request, res: express.Response) =>
   req.accepts('html')
     ? res.status(404).type('html').send('<!doctype html><title>Not found</title><p>Not found.</p>')
@@ -29,6 +32,7 @@ export function createApp(config: AppConfig, { staticDirectory, routingService }
   app.use(express.urlencoded({ extended: false, limit: '16kb' }));
   app.use(requestLogger);
   app.get('/health', (_req, res) => res.json({ status: 'ok' }));
+  app.get('/openapi.yaml', (_req, res) => res.type('application/yaml').sendFile(openapiYamlPath));
   if (staticDirectory) app.use(express.static(staticDirectory));
   app.use('/report', reportPagesRouter(config, { routingService: routing }));
   app.use('/api', apiCors(config));

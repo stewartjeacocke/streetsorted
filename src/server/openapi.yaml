@@ -1,0 +1,175 @@
+openapi: 3.1.0
+info:
+  title: Street Sorted API
+  version: 1.0.0
+  description: Public JSON API for nearby fly-tipping lookup and report submission.
+paths:
+  /api/nearby-reports:
+    get:
+      summary: Find nearby fly-tipping reports
+      parameters:
+        - name: latitude
+          in: query
+          required: true
+          schema:
+            type: number
+            minimum: -90
+            maximum: 90
+        - name: longitude
+          in: query
+          required: true
+          schema:
+            type: number
+            minimum: -180
+            maximum: 180
+      responses:
+        '200':
+          description: Nearby reports were found or no nearby reports exist.
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/NearbyReportsFound'
+                  - $ref: '#/components/schemas/NearbyReportsEmpty'
+        '400':
+          $ref: '#/components/responses/NearbyLocationRequired'
+        '422':
+          $ref: '#/components/responses/NearbyLocationUnsupported'
+        '503':
+          $ref: '#/components/responses/NearbyUnavailable'
+  /api/reports:
+    post:
+      summary: Submit a fly-tipping report
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReportRequest'
+      responses:
+        '200':
+          description: The submission was confirmed or could not be confirmed.
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/SubmissionConfirmed'
+                  - $ref: '#/components/schemas/SubmissionUnconfirmed'
+        '400':
+          $ref: '#/components/responses/SubmissionInvalid'
+        '422':
+          $ref: '#/components/responses/SubmissionFailed'
+        '503':
+          $ref: '#/components/responses/SubmissionUnavailable'
+components:
+  schemas:
+    Location:
+      type: object
+      additionalProperties: false
+      required: [latitude, longitude, capturedAt]
+      properties:
+        latitude: { type: number, minimum: -90, maximum: 90 }
+        longitude: { type: number, minimum: -180, maximum: 180 }
+        accuracyMeters: { type: number, minimum: 0 }
+        capturedAt: { type: string, format: date-time }
+    ReportRequest:
+      type: object
+      additionalProperties: false
+      required: [category, location, description, confirmed]
+      properties:
+        category: { type: string, const: fly-tipping }
+        location: { $ref: '#/components/schemas/Location' }
+        description: { type: string, minLength: 1, maxLength: 1000 }
+        confirmed: { type: boolean, const: true }
+    NearbyReport:
+      type: object
+      additionalProperties: false
+      required: [id, categoryName, recordedAt, locationLabel, statusName, description]
+      properties:
+        id: { type: string }
+        categoryName: { type: [string, 'null'] }
+        recordedAt: { type: [string, 'null'] }
+        locationLabel: { type: [string, 'null'] }
+        statusName: { type: [string, 'null'] }
+        description: { type: [string, 'null'] }
+    NearbyReportsFound:
+      type: object
+      additionalProperties: false
+      required: [state, reports]
+      properties:
+        state: { type: string, const: reports-found }
+        reports:
+          type: array
+          items: { $ref: '#/components/schemas/NearbyReport' }
+    NearbyReportsEmpty:
+      type: object
+      additionalProperties: false
+      required: [state, reports]
+      properties:
+        state: { type: string, const: no-results }
+        reports: { type: array, maxItems: 0 }
+    SubmissionConfirmed:
+      type: object
+      additionalProperties: false
+      required: [state, reference, residentMessage, retryAllowed]
+      properties:
+        state: { type: string, const: confirmed }
+        reference: { type: [string, 'null'] }
+        residentMessage: { type: string }
+        retryAllowed: { type: boolean, const: false }
+    SubmissionUnconfirmed:
+      type: object
+      additionalProperties: false
+      required: [state, reference, residentMessage, retryAllowed]
+      properties:
+        state: { type: string, const: unconfirmed }
+        reference: { type: [string, 'null'] }
+        residentMessage: { type: string }
+        retryAllowed: { type: boolean, const: true }
+    ApiFailure:
+      type: object
+      additionalProperties: false
+      required: [state, reference, residentMessage, retryAllowed]
+      properties:
+        state: { type: string, const: failed }
+        reference: { type: 'null' }
+        residentMessage: { type: string }
+        retryAllowed: { type: boolean }
+    NearbyUnavailable:
+      type: object
+      additionalProperties: false
+      required: [state, residentMessage]
+      properties:
+        state: { type: string, const: unavailable }
+        residentMessage: { type: string }
+  responses:
+    NearbyLocationRequired:
+      description: Latitude and longitude are invalid or missing.
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/NearbyUnavailable' }
+    NearbyLocationUnsupported:
+      description: The location cannot be routed to a supported council.
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/NearbyUnavailable' }
+    NearbyUnavailable:
+      description: Nearby-report lookup is temporarily unavailable.
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/NearbyUnavailable' }
+    SubmissionInvalid:
+      description: The report request is invalid.
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ApiFailure' }
+    SubmissionFailed:
+      description: The report cannot be accepted or routed.
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ApiFailure' }
+    SubmissionUnavailable:
+      description: Council identification is temporarily unavailable.
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ApiFailure' }
