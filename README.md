@@ -57,7 +57,7 @@ npm run test:e2e
 
 ## Independent release artifacts
 
-Set `SOURCE_REVISION` for every release (and pass it to Docker with `--build-arg SOURCE_REVISION=...`). Run `npm run build:static-site` with public `PUBLIC_SERVER_BASE_URL` to create `dist/static-site`; publish that directory to a static host. Run `npm run build:server` to create `dist/server` for the Node.js service. Each artifact has `release.json` with `artifactType` and `sourceRevision`.
+Run `npm run build:static-site` with public `PUBLIC_SERVER_BASE_URL` and `SOURCE_REVISION` to create `dist/static-site`; publish that directory to a static host. Run `npm run build:server` to create `dist/server` for the Node.js service. Both artifacts have `release.json` with `artifactType`; the static-site artifact always includes `sourceRevision`, while the server artifact includes it only when supplied to a direct build.
 
 ### Static-site deployment
 
@@ -70,13 +70,13 @@ Set `SOURCE_REVISION` for every release (and pass it to Docker with `--build-arg
 
 ### Server deployment
 
-1. Set `SOURCE_REVISION` to the revision being released and provide normal server runtime configuration
-   through the deployment environment.
-2. Run `npm run build:server`, or build the container with
-   `docker build --build-arg SOURCE_REVISION="$SOURCE_REVISION" -t street-sorted .`.
+1. Provide normal server runtime configuration through the deployment environment. To optionally record
+   a source revision in a direct build, set `SOURCE_REVISION` before running `npm run build:server`.
+2. Run `npm run build:server`, or build the container with `docker build -t street-sorted .`.
 3. Deploy `dist/server/` (or the built image) to the Node.js runtime, then verify `/health` and the
    `/report` flow.
-4. Verify `dist/server/release.json` has `"artifactType": "server"` and the expected `sourceRevision`.
+4. Verify `dist/server/release.json` has `"artifactType": "server"`. It has `sourceRevision` only for a
+   direct build that supplied `SOURCE_REVISION`.
 
 The artifacts can be released independently. A static-only change does not require a server deployment; a
 server-only change does not require republishing the static site.
