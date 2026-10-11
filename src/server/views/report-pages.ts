@@ -1,24 +1,22 @@
 import type { NearbyResult } from '../domain/nearby-report.js';
 import type { ReportDraftSession } from '../services/report-draft-session-store.js';
 import { renderReportPage } from './renderer.js';
-const coordinate = (value: number) => value.toFixed(5);
-const locationDisplay = (draft: ReportDraftSession) =>
-  `${coordinate(draft.location!.latitude)}, ${coordinate(draft.location!.longitude)}`;
+const locationDisplay = (draft: ReportDraftSession) => draft.postcode ?? '';
 const councilName = (draft: ReportDraftSession, name?: string) =>
   name ?? draft.councilProfileId ?? '';
 export function locationPage(
   draft: ReportDraftSession,
   messages: string[] = [],
   values: Record<string, string> = {},
-  status: 'normal' | 'unavailable' | 'unsupported' = 'normal',
+  status: 'normal' | 'unavailable' | 'unsupported' | 'not-found' = 'normal',
 ) {
   return renderReportPage('location', {
     csrfToken: draft.csrfToken,
     messages,
-    latitude: values.latitude ?? '',
-    longitude: values.longitude ?? '',
+    postcode: values.postcode ?? '',
     routingUnavailable: status === 'unavailable',
     routingUnsupported: status === 'unsupported',
+    postcodeNotFound: status === 'not-found',
   });
 }
 export function nearbyPage(draft: ReportDraftSession, result: NearbyResult, name?: string) {

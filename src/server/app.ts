@@ -10,7 +10,13 @@ import { reportRouter } from './routes/reports.js';
 import { MapItAuthorityLookup } from './adapters/authority-lookup/mapit.js';
 import { councilDirectoryFromConfig } from './services/council-directory.js';
 import { CouncilRoutingService } from './services/council-routing-service.js';
-type AppOptions = { staticDirectory?: string; routingService?: CouncilRoutingService };
+import { PostcodesIoLookup } from './adapters/postcode-lookup/postcodes-io.js';
+import { PostcodeLocationService } from './services/postcode-location-service.js';
+type AppOptions = {
+  staticDirectory?: string;
+  routingService?: CouncilRoutingService;
+  postcodeLocationService?: PostcodeLocationService;
+};
 const openapiYamlPath = resolve(dirname(fileURLToPath(import.meta.url)), 'openapi.yaml');
 const notFound = (req: express.Request, res: express.Response) =>
   req.accepts('html')
@@ -21,8 +27,13 @@ const notFound = (req: express.Request, res: express.Response) =>
         residentMessage: 'Not found.',
         retryAllowed: false,
       });
-export function createApp(config: AppConfig, { staticDirectory, routingService }: AppOptions = {}) {
+export function createApp(
+  config: AppConfig,
+  { staticDirectory, routingService, postcodeLocationService }: AppOptions = {},
+) {
   const app = express();
+  const postcodeLocations =
+    postcodeLocationService ?? new PostcodeLocationService(new PostcodesIoLookup());
   const routing =
     routingService ??
     new CouncilRoutingService(new MapItAuthorityLookup(config), councilDirectoryFromConfig(config));
@@ -34,7 +45,13 @@ export function createApp(config: AppConfig, { staticDirectory, routingService }
   app.get('/health', (_req, res) => res.json({ status: 'ok' }));
   app.get('/openapi.yaml', (_req, res) => res.type('application/yaml').sendFile(openapiYamlPath));
   if (staticDirectory) app.use(express.static(staticDirectory));
-  app.use('/report', reportPagesRouter(config, { routingService: routing }));
+  app.use(
+    '/report',
+    reportPagesRouter(config, {
+      routingService: routing,
+      postcodeLocationService: postcodeLocations,
+    }),
+  );
   app.use('/api', apiCors(config));
   app.use('/api', nearbyReportsRouter(config, routing));
   app.use('/api', reportRouter(config, routing));

@@ -22,6 +22,7 @@ function draft(overrides: Partial<ReportDraftSession> = {}): ReportDraftSession 
     csrfToken: 'csrf-token',
     stage: 'review',
     location: { latitude: 51.65, longitude: -0.102, capturedAt: '2026-10-04T00:00:00.000Z' },
+    postcode: 'N1 1AA',
     description: 'Waste beside bins',
     lastActivityAt: 0,
     ...overrides,
@@ -64,12 +65,11 @@ describe('Handlebars view renderer', () => {
 describe('templated report pages', () => {
   it('renders the location, details, review, and outcome form contracts', () => {
     const location = locationPage(draft(), ['<img src=x onerror=alert(1)>'], {
-      latitude: '51.65',
-      longitude: '-0.102',
+      postcode: 'N1 1AA',
     });
     assert.match(location, /<title>Location \| Street Sorted<\/title>/);
     assert.match(location, /name="csrf" value="csrf-token"/);
-    assert.match(location, /value="51\.65"/);
+    assert.match(location, /value="N1 1AA"/);
     assert.match(location, /<script defer src="\/location-helper\.js"><\/script>/);
     assert.match(location, /&lt;img src&#x3D;x onerror&#x3D;alert\(1\)&gt;/);
 
@@ -82,7 +82,7 @@ describe('templated report pages', () => {
     assert.match(details, /action="\/report\/cancel"/);
 
     const review = reviewPage(draft());
-    assert.match(review, /51\.65000, -0\.10200/);
+    assert.match(review, /N1 1AA/);
     assert.match(review, /action="\/report\/submit"/);
     assert.match(review, /name="confirmed" value="yes"/);
     assert.match(review, /action="\/report\/review\/edit"/);

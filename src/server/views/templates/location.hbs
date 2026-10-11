@@ -1,14 +1,14 @@
 {{#> layout title="Location" locationHelper=true}}
 <section>
   <h2>Location required</h2>
-  <p>Enter your location to check for nearby reports. You can use the location helper if your browser supports it.</p>
+  <p>Enter the full postcode where the fly-tipping happened. If you allow location access, we can suggest a nearby postcode.</p>
   {{> errors messages=messages}}
-  {{#if routingUnavailable}}<p role="alert">Council identification is temporarily unavailable. Please retry or leave this report.</p>{{/if}}
-  {{#if routingUnsupported}}<p role="alert">This location cannot currently be routed to a supported council. Correct it or leave this report.</p>{{/if}}
+  {{#if routingUnavailable}}<p role="alert">Postcode or council identification is temporarily unavailable. Please retry.</p>{{/if}}
+  {{#if routingUnsupported}}<p role="alert">This postcode cannot currently be routed to a supported council. Enter a different postcode or leave this report.</p>{{/if}}
+  {{#if postcodeNotFound}}<p role="alert">We could not find that postcode. Enter a different full postcode.</p>{{/if}}
   <form method="post" action="/report/location">
     <input type="hidden" name="csrf" value="{{csrfToken}}">
-    <label>Latitude<input name="latitude" inputmode="decimal" value="{{latitude}}" required></label>
-    <label>Longitude<input name="longitude" inputmode="decimal" value="{{longitude}}" required></label>
+    <label>Incident postcode<input name="postcode" autocomplete="postal-code" value="{{postcode}}" required></label>
     <button type="submit">Check nearby reports</button>
   </form>
   <p><a href="/">Leave this report</a></p>
