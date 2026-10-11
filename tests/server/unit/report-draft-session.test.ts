@@ -19,7 +19,8 @@ describe('report draft session store', () => {
     store.clear(terminal.id);
     assert.equal(store.get(terminal.id), null);
     const retryable = store.create();
-    store.update(retryable, { stage: 'review' });
+    store.update(retryable, { stage: 'review', postcode: 'N1 9PF' });
     assert.equal(store.get(retryable.id)?.stage, 'review');
+    assert.equal(store.get(retryable.id)?.postcode, 'N1 9PF');
   });
 });

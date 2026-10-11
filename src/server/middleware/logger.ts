@@ -3,7 +3,7 @@ import type { NextFunction, Request, Response } from 'express';
 export function redact(value: unknown): unknown {
   if (!value || typeof value !== 'object') return value;
   const blocked =
-    /description|latitude|longitude|accuracy|cookie|token|csrf|session|authorization|api[-_]?key|secret|password|credential|signature|html|body|report|address|history|image|match/i;
+    /description|postcode|latitude|longitude|accuracy|cookie|token|csrf|session|authorization|api[-_]?key|secret|password|credential|signature|html|body|report|address|history|image|match/i;
   return Object.fromEntries(
     Object.entries(value as Record<string, unknown>).map(([key, entry]) => [
       key,

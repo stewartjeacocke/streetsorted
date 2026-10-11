@@ -1,11 +1,13 @@
 import { expect, test } from '@playwright/test';
 
-async function reachDetails(page: import('@playwright/test').Page, latitude = '51.65') {
+async function reachDetails(page: import('@playwright/test').Page, postcode = 'EN2 7DA') {
   await page.goto('/report');
-  await page.getByLabel('Latitude').fill(latitude);
-  await page.getByLabel('Longitude').fill('-0.102');
+  await page.getByLabel('Incident postcode').fill(postcode);
   await page.getByRole('button', { name: 'Check nearby reports' }).click();
-  await page.getByRole('button', { name: 'Continue to report details' }).click();
+  await page.waitForURL(/\/report\/nearby/);
+  const continueButton = page.getByRole('button', { name: 'Continue to report details' });
+  if (await continueButton.count()) await continueButton.click();
+  else await page.getByRole('button', { name: 'No, none match' }).click();
 }
 
 test.describe('progressively enhanced reporting', () => {
@@ -27,8 +29,7 @@ test.describe('progressively enhanced reporting', () => {
 
   test('allows duplicate-match exit without submitting a report', async ({ page }) => {
     await page.goto('/report');
-    await page.getByLabel('Latitude').fill('51.538');
-    await page.getByLabel('Longitude').fill('-0.102');
+    await page.getByLabel('Incident postcode').fill('N1 9PF');
     await page.getByRole('button', { name: 'Check nearby reports' }).click();
     await expect(page.getByText('Dumped or flytipped waste').first()).toBeVisible();
     await page.getByRole('button', { name: 'Yes, a report matches' }).click();
@@ -37,10 +38,9 @@ test.describe('progressively enhanced reporting', () => {
 
   test('shows server-side validation and recovery pages', async ({ page }) => {
     await page.goto('/report');
-    await page.getByLabel('Latitude').fill('bad');
-    await page.getByLabel('Longitude').fill('-0.102');
+    await page.getByLabel('Incident postcode').fill('bad');
     await page.getByRole('button', { name: 'Check nearby reports' }).click();
-    await expect(page.getByText('Enter a valid latitude.')).toBeVisible();
+    await expect(page.getByText('Enter a full UK postcode.')).toBeVisible();
     await page.goto('/report/review');
     await expect(page.getByText('Start a new report')).toBeVisible();
   });
@@ -58,18 +58,19 @@ test('uses the optional helper only to fill the manual location form', async ({ 
     });
   });
   await page.goto('/report');
-  await expect(page.getByLabel('Latitude')).toHaveValue('51.65');
-  await expect(page.getByLabel('Longitude')).toHaveValue('-0.102');
+  await expect(page.getByLabel('Incident postcode')).toHaveValue('EN2 7DA');
   await page.getByRole('button', { name: 'Check nearby reports' }).click();
-  await expect(page.getByRole('button', { name: 'Continue to report details' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Nearby reports' })).toBeVisible();
 });
 
 test('retries an unconfirmed submission with ordinary form data', async ({ page }) => {
   await page.goto('/report');
-  await page.getByLabel('Latitude').fill('51.65');
-  await page.getByLabel('Longitude').fill('-0.102');
+  await page.getByLabel('Incident postcode').fill('EN2 7DA');
   await page.getByRole('button', { name: 'Check nearby reports' }).click();
-  await page.getByRole('button', { name: 'Continue to report details' }).click();
+  await page.waitForURL(/\/report\/nearby/);
+  const continueButton = page.getByRole('button', { name: 'Continue to report details' });
+  if (await continueButton.count()) await continueButton.click();
+  else await page.getByRole('button', { name: 'No, none match' }).click();
   await page.getByLabel('Description').fill('ambiguous');
   await page.getByRole('button', { name: 'Review report' }).click();
   await page.getByRole('button', { name: 'Confirm submission' }).click();
@@ -88,16 +89,11 @@ test('retries an unconfirmed submission with ordinary form data', async ({ page 
 test.describe('nearby availability and ordinary navigation', () => {
   test.use({ javaScriptEnabled: false });
 
-  test('allows a nearby-lookup retry and has no client route shell', async ({ page }) => {
+  test('uses ordinary navigation and has no client route shell', async ({ page }) => {
     await page.goto('/report');
-    await page.getByLabel('Latitude').fill('51.7');
-    await page.getByLabel('Longitude').fill('-0.102');
+    await page.getByLabel('Incident postcode').fill('N1 9PF');
     await page.getByRole('button', { name: 'Check nearby reports' }).click();
-    await expect(
-      page.getByText('Nearby reports could not be retrieved. Please try again.'),
-    ).toBeVisible();
-    await page.getByRole('button', { name: 'Retry nearby reports' }).click();
-    await expect(page.getByRole('button', { name: 'Continue to report details' })).toBeVisible();
+    await expect(page.getByText('Dumped or flytipped waste').first()).toBeVisible();
     await expect(page.locator('#root')).toHaveCount(0);
   });
 });

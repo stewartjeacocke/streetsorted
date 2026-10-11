@@ -19,6 +19,8 @@ import {
 } from '../services/report-draft-session-store.js';
 import { ReportSubmissionService } from '../services/report-submission-service.js';
 import { CouncilRoutingService } from '../services/council-routing-service.js';
+import { PostcodeLocationService } from '../services/postcode-location-service.js';
+import { suggestionCoordinatesSchema } from '../domain/postcode.js';
 import {
   nearbyPage,
   detailsPage,
@@ -32,6 +34,7 @@ type Dependencies = {
   nearbyService?: NearbyReportsService;
   submissionService?: ReportSubmissionService;
   routingService: CouncilRoutingService;
+  postcodeLocationService: PostcodeLocationService;
 };
 const html = (res: Response, content: string, status = 200) =>
   res.status(status).type('html').send(content);
@@ -60,7 +63,8 @@ export function reportPagesRouter(config: AppConfig, dependencies: Dependencies)
     store = dependencies.store ?? new ReportDraftSessionStore(),
     nearbyService = dependencies.nearbyService ?? new NearbyReportsService(config),
     submissionService = dependencies.submissionService ?? new ReportSubmissionService(config),
-    routing = dependencies.routingService;
+    routing = dependencies.routingService,
+    postcodeLocations = dependencies.postcodeLocationService;
   const council = (draft: ReportDraftSession) => routing.council(draft.councilProfileId);
   router.use((_req, _res, next) => {
     store.cleanup();
@@ -77,33 +81,25 @@ export function reportPagesRouter(config: AppConfig, dependencies: Dependencies)
     if (!draft || !validPost(req, res, draft)) return;
     const parsed = locationFormSchema.safeParse(req.body);
     if (!parsed.success) return html(res, locationPage(draft, formErrors(parsed.error), req.body));
-    const location = { ...parsed.data, capturedAt: new Date().toISOString() };
+    const resolved = await postcodeLocations.resolve(parsed.data.postcode);
+    if (resolved.state === 'unavailable')
+      return html(res, locationPage(draft, [], req.body, 'unavailable'), 503);
+    if (resolved.state === 'not-found')
+      return html(res, locationPage(draft, [], req.body, 'not-found'), 422);
+    const location = {
+      latitude: resolved.location.latitude,
+      longitude: resolved.location.longitude,
+      capturedAt: new Date().toISOString(),
+    };
     const result = await routing.route(location);
     if (result.state === 'unavailable')
-      return html(
-        res,
-        locationPage(
-          draft,
-          ['Council identification is temporarily unavailable. Please try again.'],
-          req.body,
-          'unavailable',
-        ),
-        503,
-      );
+      return html(res, locationPage(draft, [], req.body, 'unavailable'), 503);
     if (result.state === 'unsupported')
-      return html(
-        res,
-        locationPage(
-          draft,
-          ['This location cannot currently be routed to a supported council.'],
-          req.body,
-          'unsupported',
-        ),
-        422,
-      );
+      return html(res, locationPage(draft, [], req.body, 'unsupported'), 422);
     store.resetLocation(
       draft,
       location,
+      resolved.location.postcode,
       result.council.id,
       result.council.anonymousSubmissionAvailable ? 'nearby' : 'details',
     );
@@ -111,6 +107,17 @@ export function reportPagesRouter(config: AppConfig, dependencies: Dependencies)
       303,
       result.council.anonymousSubmissionAvailable ? '/report/nearby' : '/report/details',
     );
+  });
+  router.post('/location/suggestion', async (req, res) => {
+    const draft = requireDraft(req, res, store);
+    if (!draft) return;
+    if (!csrfIsValid(draft, req.body.csrf)) return res.status(403).end();
+    const parsed = suggestionCoordinatesSchema.safeParse(req.body);
+    if (!parsed.success) return res.status(204).end();
+    const suggestion = await postcodeLocations.suggest(parsed.data.latitude, parsed.data.longitude);
+    res.set('Cache-Control', 'no-store');
+    if (suggestion.state === 'suggested') return res.json({ postcode: suggestion.postcode });
+    return res.status(suggestion.state === 'unavailable' ? 503 : 204).end();
   });
   router.get('/nearby', async (req, res) => {
     const draft = requireDraft(req, res, store),

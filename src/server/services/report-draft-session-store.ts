@@ -7,6 +7,7 @@ export type ReportDraftSession = {
   csrfToken: string;
   stage: ReportStage;
   location?: IncidentLocation;
+  postcode?: string;
   councilProfileId?: string;
   nearbyCouncilProfileId?: string;
   description?: string;
@@ -48,12 +49,14 @@ export class ReportDraftSessionStore {
   resetLocation(
     draft: ReportDraftSession,
     location: IncidentLocation,
+    postcode: string,
     councilProfileId: string,
     stage: ReportStage = 'nearby',
   ) {
     return this.update(draft, {
       stage,
       location,
+      postcode,
       councilProfileId,
       nearbyCouncilProfileId: undefined,
       description: undefined,

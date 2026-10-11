@@ -7,6 +7,7 @@ describe('redact', () => {
     assert.deepEqual(
       redact({
         description: 'private waste details',
+        postcode: 'N1 9PF',
         latitude: 51.5,
         longitude: -0.1,
         cookie: 'secret',
@@ -17,6 +18,7 @@ describe('redact', () => {
       }),
       {
         description: '[REDACTED]',
+        postcode: '[REDACTED]',
         latitude: '[REDACTED]',
         longitude: '[REDACTED]',
         cookie: '[REDACTED]',

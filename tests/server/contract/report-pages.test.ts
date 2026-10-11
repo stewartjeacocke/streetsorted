@@ -9,6 +9,7 @@ import { createApp } from '../../../src/server/app.js';
 import { loadConfig } from '../../../src/server/config.js';
 import { buildStaticSite } from '../../../src/static-site/build.js';
 import { createMockTarget } from '../support/mock-target.js';
+import { testPostcodeLocationService } from '../support/postcode-service.js';
 
 async function withApp(run: (agent: ReturnType<typeof request.agent>) => Promise<void>) {
   const target = createMockTarget().listen(0);
@@ -24,6 +25,7 @@ async function withApp(run: (agent: ReturnType<typeof request.agent>) => Promise
       RATE_LIMIT_WINDOW_MS: '60000',
       RATE_LIMIT_MAX: '100',
     }),
+    { postcodeLocationService: testPostcodeLocationService() },
   );
   try {
     await run(request.agent(app));
@@ -47,12 +49,12 @@ function csrf(html: string) {
   return match[1];
 }
 
-async function reachDetails(agent: ReturnType<typeof request.agent>, latitude = '51.65') {
+async function reachDetails(agent: ReturnType<typeof request.agent>, postcode = 'N1 1AA') {
   const start = await agent.get('/report').set('Accept', 'text/html');
   const location = await agent
     .post('/report/location')
     .type('form')
-    .send({ csrf: csrf(start.text), latitude, longitude: '-0.102' });
+    .send({ csrf: csrf(start.text), postcode });
   assert.equal(location.status, 303);
   const nearby = await agent.get('/report/nearby').set('Accept', 'text/html');
   const decision = await agent
@@ -118,16 +120,32 @@ describe('server-rendered report pages', () => {
       assertSharedDocument(response.text, true);
     }));
 
+  it('returns an optional postcode suggestion without changing the draft', async () =>
+    withApp(async (agent) => {
+      const start = await agent.get('/report');
+      const response = await agent
+        .post('/report/location/suggestion')
+        .send({ csrf: csrf(start.text), latitude: 51.65, longitude: -0.102 });
+      assert.equal(response.status, 200);
+      assert.deepEqual(response.body, { postcode: 'N1 1AA' });
+      assert.equal(response.headers['cache-control'], 'no-store');
+      const location = await agent
+        .post('/report/location')
+        .type('form')
+        .send({ csrf: csrf(start.text), postcode: 'N1 1AA' });
+      assert.equal(location.status, 303);
+    }));
+
   it('keeps validation feedback on the server-rendered location page', async () =>
     withApp(async (agent) => {
       const start = await agent.get('/report');
       const response = await agent
         .post('/report/location')
         .type('form')
-        .send({ csrf: csrf(start.text), latitude: 'bad', longitude: '' });
+        .send({ csrf: csrf(start.text), postcode: 'bad' });
       assert.equal(response.status, 200);
-      assert.match(response.text, /Enter a valid latitude/);
-      assert.match(response.text, /Enter a longitude/);
+      assert.match(response.text, /Enter a full UK postcode/);
+      assert.match(response.text, /Incident postcode/);
     }));
 
   it('completes a no-JavaScript manual report submission', async () =>
@@ -155,7 +173,7 @@ describe('server-rendered report pages', () => {
       await agent
         .post('/report/location')
         .type('form')
-        .send({ csrf: csrf(start.text), latitude: '51.538', longitude: '-0.102' });
+        .send({ csrf: csrf(start.text), postcode: 'N1 9PF' });
       const nearby = await agent.get('/report/nearby');
       assert.match(nearby.text, /Dumped or flytipped waste/);
       const outcome = await agent
@@ -171,7 +189,7 @@ describe('server-rendered report pages', () => {
       const csrfFailure = await agent
         .post('/report/location')
         .type('form')
-        .send({ latitude: '51.5', longitude: '-0.1' });
+        .send({ postcode: 'N1 9PF' });
       assert.equal(csrfFailure.status, 409);
       const direct = await request(agent.app).get('/report/review').set('Accept', 'text/html');
       assert.equal(direct.status, 409);
@@ -199,7 +217,7 @@ describe('report-page recovery and retry behavior', () => {
       await agent
         .post('/report/location')
         .type('form')
-        .send({ csrf: csrf(start.text), latitude: '51.7', longitude: '-0.102' });
+        .send({ csrf: csrf(start.text), postcode: 'N1 1AB' });
       const unavailable = await agent.get('/report/nearby');
       assert.match(unavailable.text, /Nearby reports could not be retrieved/);
       assert.match(unavailable.text, /action="\/report\/nearby\/retry"/);
